@@ -254,10 +254,12 @@ def analyze(track: Track, request: RouteRequest, areas: Sequence[ProtectedAreaCr
 
     warnings: list[RouteWarning] = []
     target_m = request.distance_km * 1000
-    if request.loop and abs(track.distance_m - target_m) / target_m > 0.15:
+    if (request.loop or request.via) and abs(track.distance_m - target_m) / target_m > 0.15:
+        reason = ("it must pass through the requested via points" if request.via
+                  else "the local trail network did not allow a closer fit")
         warnings.append(RouteWarning("distance", (
             f"The route is {track.distance_m / 1000:.1f} km instead of the requested {request.distance_km:g} km: "
-            "the local trail network did not allow a closer fit.")))
+            f"{reason}.")))
     if request.max_climb_m and ascent > request.max_climb_m * 1.1:
         warnings.append(RouteWarning("climb", (
             f"Estimated climbing ({ascent:.0f} m) exceeds the requested maximum ({request.max_climb_m:g} m).")))

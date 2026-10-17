@@ -16,7 +16,7 @@ from .config import Config
 from .core.analysis import analyze, overlap_ratio, score
 from .core.loop import generate_candidates
 from .core.models import ProtectedAreaCrossing, Route, RouteRequest, RouteWarning, Track
-from .engines.base import RoutingEngine
+from .engines.base import EngineError, RoutingEngine
 from .engines.brouter import BRouterEngine
 from .engines.ors import ORSEngine
 from .exporters import ExportResult, get_exporter
@@ -40,6 +40,7 @@ class GenerationResult:
             "name": r.name,
             "gpx_file": str(r.gpx_file) if r.gpx_file else None,
             "start": {"name": r.start_name, "lat": r.start.lat, "lon": r.start.lon},
+            "via": [{"name": n, "lat": c.lat, "lon": c.lon} for n, c in r.via],
             "summary": r.summary.to_dict(),
             "engine": f"{r.track.engine} ({r.track.profile})",
             "candidates_evaluated": self.candidates_evaluated,
@@ -87,8 +88,23 @@ class RouteService:
         report(f"Looking up «{request.start}»…")
         place = self.geocoder.search(request.start)
         target_m = request.distance_km * 1000
+        via = []
+        for v in request.via:
+            report(f"Looking up via point «{v}»…")
+            via.append(self.geocoder.search(v))
 
-        if request.loop:
+        if via:
+            # Fixed via points define the shape: route through them in the given order.
+            end = place if request.loop else self.geocoder.search(request.end or "")
+            points = [place.coordinate, *(p.coordinate for p in via), end.coordinate]
+            report("Computing the route through the via points…")
+            try:
+                candidates = [self.engine.route(points, request.trail_type)]
+            except EngineError as e:
+                raise EngineError(
+                    f"Could not route through the via points ({e}); check that each one is on or near a trail."
+                ) from e
+        elif request.loop:
             seed = request.seed if request.seed is not None else random.randrange(1_000_000)
             candidates = generate_candidates(
                 self.engine, place.coordinate, target_m, request.trail_type, seed, n_candidates,
@@ -113,7 +129,9 @@ class RouteService:
         summary.warnings[-2:-2] = extra_warnings  # before the general warnings
 
         name = request.name or self._default_name(request, place.name, track)
-        return Route(name, place.coordinate, place.name, track, summary, request), len(candidates)
+        route = Route(name, place.coordinate, place.name, track, summary, request,
+                      via=[(p.name, p.coordinate) for p in via])
+        return route, len(candidates)
 
     @staticmethod
     def _default_name(request: RouteRequest, place_name: str, track: Track) -> str:

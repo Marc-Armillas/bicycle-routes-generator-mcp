@@ -28,7 +28,7 @@
   "tools": [
     {
       "name": "generate_route",
-      "description": "Generates an MTB route (loop or point-to-point) on real trails, saves it as GPX and returns the summary and warnings."
+      "description": "Generates an MTB route (loop or point-to-point, optionally through via points) on real trails, saves it as GPX and returns the summary and warnings."
     },
     {
       "name": "list_routes",

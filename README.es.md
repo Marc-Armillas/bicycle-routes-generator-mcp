@@ -77,6 +77,7 @@ No hay claves ni datos personales en el código: todo se configura con variables
 uv run mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 500
 uv run mtb-routes generate "41.4386,2.0108" --km 15            # también con coordenadas
 uv run mtb-routes generate "El Papiol" --km 20 --end "Sant Cugat del Vallès"   # ruta lineal
+uv run mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"  # circular por puntos de paso
 uv run mtb-routes generate "El Papiol" --km 40 --seed 7        # otra alternativa reproducible
 uv run mtb-routes generate "El Papiol" --km 25 --json          # salida JSON
 uv run mtb-routes list
@@ -108,8 +109,9 @@ Más ejemplos con salidas reales en [docs/pruebas-reales.md](docs/pruebas-reales
 
 El servidor expone dos herramientas:
 
-- `generate_route(start, distance_km, max_climb_m?, trail_type?, loop=true, end?, name?, seed?)`
-  → ruta del GPX, resumen y avisos.
+- `generate_route(start, distance_km, max_climb_m?, trail_type?, loop=true, end?, name?, seed?, via?)`
+  → ruta del GPX, resumen y avisos. `via` es una lista de lugares por los que la ruta debe
+  pasar, en orden (p. ej. "circular desde El Papiol pasando por Castellbisbal y Molins de Rei").
 - `list_routes()` → rutas guardadas.
 
 ### Claude Code
@@ -215,6 +217,10 @@ envíos a plataformas son **exportadores** opcionales con una interfaz común
 4. Se ajusta el radio hasta acercarse a la distancia pedida (unas 2-4 peticiones).
 5. Se generan 6 candidatas y se elige la mejor según distancia, tráfico, caminos repetidos,
    superficie, accesos prohibidos, desnivel y pendientes.
+
+Con puntos de paso (`--via` / `via`), los puntos aleatorios se sustituyen por los tuyos: el
+motor calcula inicio → via 1 → … → via N → inicio (o → final, si es lineal), en el orden
+dado. La distancia la marcan esos puntos, no `--km`; si difiere más de un 15 % se avisa.
 
 ## Servicios externos y sus políticas
 

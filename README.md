@@ -74,6 +74,7 @@ variables (or a `.env` file in the folder you run the CLI from).
 uv run mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 500
 uv run mtb-routes generate "41.4386,2.0108" --km 15            # coordinates work too
 uv run mtb-routes generate "El Papiol" --km 20 --end "Sant Cugat del Vallès"   # point-to-point
+uv run mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"  # loop through via points
 uv run mtb-routes generate "El Papiol" --km 40 --seed 7        # another reproducible alternative
 uv run mtb-routes generate "El Papiol" --km 25 --json          # JSON output
 uv run mtb-routes list
@@ -105,8 +106,9 @@ More examples with real output in [docs/pruebas-reales.md](docs/pruebas-reales.m
 
 The server exposes two tools:
 
-- `generate_route(start, distance_km, max_climb_m?, trail_type?, loop=true, end?, name?, seed?)`
-  → GPX path, summary and warnings.
+- `generate_route(start, distance_km, max_climb_m?, trail_type?, loop=true, end?, name?, seed?, via?)`
+  → GPX path, summary and warnings. `via` is a list of places the route must pass through, in
+  order (e.g. "a loop from El Papiol passing through Castellbisbal and Molins de Rei").
 - `list_routes()` → saved routes.
 
 ### Claude Code
@@ -211,6 +213,11 @@ platforms is done by optional **exporters** sharing a common interface
 4. The radius is adjusted until the requested distance is approached (about 2-4 requests).
 5. Six candidates are generated and the best one is picked by distance, traffic, repeated
    trails, surface, forbidden access, climbing and grades.
+
+With via points (`--via` / `via`), your points replace the random ones: the engine routes
+start → via 1 → … → via N → start (or → end, for point-to-point), in the given order. The
+distance comes from those points, not from `--km`; a warning is added if it differs by more
+than 15 %.
 
 ## External services and their policies
 

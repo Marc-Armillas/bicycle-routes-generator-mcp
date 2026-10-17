@@ -8,12 +8,15 @@ import pytest
 from mtb_routes import mcp_server
 from mtb_routes.config import Config
 from mtb_routes.core.gpx import build_gpx
+from mtb_routes.core.loop import offset
 from mtb_routes.core.models import ProtectedAreaCrossing, RouteRequest
+from mtb_routes.engines.base import EngineError
 from mtb_routes.exporters import available_exporters, get_exporter
 from mtb_routes.exporters.disk import file_name, safe_path
+from mtb_routes.geo.nominatim import Place
 from mtb_routes.service import RouteService
 
-from .conftest import FakeEngine, FakeGeocoder, FakeProtectedAreas
+from .conftest import PAPIOL, FakeEngine, FakeGeocoder, FakeProtectedAreas
 
 NS = {"g": "http://www.topografix.com/GPX/1/1"}
 
@@ -40,6 +43,11 @@ def test_request_validation():
         RouteRequest("x", 25, loop=False)
     with pytest.raises(ValueError):
         RouteRequest("x", 1000)
+    with pytest.raises(ValueError):
+        RouteRequest("x", 25, via=("A", "  "))
+    with pytest.raises(ValueError):
+        RouteRequest("x", 25, via=tuple(f"P{i}" for i in range(11)))
+    assert RouteRequest("x", 25, via=[" A ", "B"]).via == ("A", "B")
 
 
 def test_generate_and_save_full_route(config):
@@ -67,6 +75,43 @@ def test_generate_and_save_full_route(config):
 def test_point_to_point_route(config):
     route, n = make_service(config).generate(RouteRequest("A", 10, loop=False, end="B"))
     assert n == 1 and "point-to-point" in route.name
+
+
+class ViaGeocoder(FakeGeocoder):
+    """Each place name maps to a distinct point east of El Papiol."""
+
+    def search(self, text: str) -> Place:
+        self.queries.append(text)
+        return Place(offset(PAPIOL, 1000 * len(self.queries), 90), text)
+
+
+def test_loop_through_via_points_in_order(config):
+    engine, geocoder = FakeEngine(), ViaGeocoder()
+    service = RouteService(config, engine=engine, geocoder=geocoder, protected_areas=FakeProtectedAreas())
+    result = service.generate_and_save(RouteRequest("Start", 20, via=("A", "B")))
+    assert geocoder.queries == ["Start", "A", "B"]
+    start, a, b = (offset(PAPIOL, 1000 * k, 90) for k in (1, 2, 3))
+    assert engine.calls == [[start, a, b, start]]
+    d = result.to_dict()
+    assert [v["name"] for v in d["via"]] == ["A", "B"]
+    assert result.candidates_evaluated == 1
+    distance = next(w for w in d["summary"]["warnings"] if w["kind"] == "distance")
+    assert "via points" in distance["message"]
+
+
+def test_point_to_point_through_via_points(config):
+    engine = FakeEngine()
+    service = RouteService(config, engine=engine, geocoder=ViaGeocoder(), protected_areas=FakeProtectedAreas())
+    route, _ = service.generate(RouteRequest("A", 10, loop=False, end="C", via=("B",)))
+    assert len(engine.calls[0]) == 3 and engine.calls[0][0] != engine.calls[0][-1]
+    assert [n for n, _ in route.via] == ["B"]
+
+
+def test_via_point_far_from_trails_explains_error(config):
+    service = RouteService(config, engine=FakeEngine(initial_failures=1), geocoder=ViaGeocoder(),
+                           protected_areas=FakeProtectedAreas())
+    with pytest.raises(EngineError, match="via points"):
+        service.generate(RouteRequest("A", 10, via=("B",)))
 
 
 def test_safe_file_name(tmp_path):
@@ -105,8 +150,10 @@ def test_mcp_tools(config, monkeypatch):
     assert d["gpx_file"].endswith(".gpx") and "summary" in d
     error = asyncio.run(mcp_server.generate_route("El Papiol", 15, loop=False))
     assert "error" in error
+    via = asyncio.run(mcp_server.generate_route("El Papiol", 15, via=["Castellbisbal"]))
+    assert [v["name"] for v in via["via"]] == ["El Papiol, Baix Llobregat, Barcelona, Catalonia, Spain"]
     listing = asyncio.run(mcp_server.list_routes())
-    assert len(listing["routes"]) == 1 and "garmin" in listing["available_exporters"]
+    assert len(listing["routes"]) == 2 and "garmin" in listing["available_exporters"]
 
 
 def test_mcp_server_exposes_tools():

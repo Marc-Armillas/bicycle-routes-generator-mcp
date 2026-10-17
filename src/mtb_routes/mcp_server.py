@@ -11,7 +11,7 @@ from pydantic import Field
 
 from . import __version__
 from .config import load_config
-from .core.models import RouteRequest
+from .core.models import MAX_VIA_POINTS, RouteRequest
 from .engines.base import EngineError
 from .exporters import available_exporters
 from .geo.nominatim import POLICY_URL, GeocodingError
@@ -24,6 +24,8 @@ OpenRouteService engine) and saves them as GPX with elevation.
 Rules:
 - Never invent coordinates or tracks: always use generate_route. Pass the place as the user
   says it (or 'lat,lon' if they give coordinates).
+- If the user names places the route must pass through, pass them in `via`, in the order
+  they will be ridden. With via points the distance comes from them, not from distance_km.
 - Show the user the summary and ALL warnings (traffic, grades >12 %, protected areas,
   access), remind them that the elevation model's climbing may differ from a barometric
   watch and that they must check the route before riding.
@@ -59,6 +61,10 @@ async def generate_route(
     end: Annotated[str | None, Field(description="End point if the route is not a loop")] = None,
     name: Annotated[str | None, Field(description="Route name (optional)")] = None,
     seed: Annotated[int | None, Field(description="Seed to repeat the same route; change it for an alternative")] = None,
+    via: Annotated[
+        list[str] | None,
+        Field(max_length=MAX_VIA_POINTS, description="Places the route must pass through, in order (names or 'lat,lon')"),
+    ] = None,
 ) -> dict[str, Any]:
     """Generate an MTB route on real trails, save it as GPX and return the summary and warnings.
 
@@ -67,7 +73,7 @@ async def generate_route(
     try:
         request = RouteRequest(
             start=start, distance_km=distance_km, max_climb_m=max_climb_m, trail_type=trail_type,
-            loop=loop, end=end, name=name, seed=seed,
+            loop=loop, end=end, name=name, seed=seed, via=tuple(via or ()),
         )
         service = _get_service()
         result = await anyio.to_thread.run_sync(lambda: service.generate_and_save(request))
