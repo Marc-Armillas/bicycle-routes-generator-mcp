@@ -11,6 +11,7 @@ from .base import EngineError
 
 ORS_URL = "https://api.openrouteservice.org"
 PROFILE = "cycling-mountain"
+ROAD_PROFILE = "cycling-road"
 
 # ORS `extra_info` codes translated into equivalent OSM tags, so the analysis is the
 # same whatever the engine.
@@ -48,7 +49,7 @@ def _tags(extras: dict[str, Any], index: int) -> dict[str, str]:
     return tags
 
 
-def parse_geojson(data: dict[str, Any], waypoints: list[Coordinate]) -> Track:
+def parse_geojson(data: dict[str, Any], waypoints: list[Coordinate], profile: str = PROFILE) -> Track:
     try:
         feature = data["features"][0]
         coords = feature["geometry"]["coordinates"]
@@ -73,7 +74,7 @@ def parse_geojson(data: dict[str, Any], waypoints: list[Coordinate]) -> Track:
         else:
             segments.append(Segment(dist, tags))
     distance = float(props.get("summary", {}).get("distance") or cumulative[-1])
-    return Track(points, segments or [Segment(distance, {})], distance, "ors", PROFILE, list(waypoints))
+    return Track(points, segments or [Segment(distance, {})], distance, "ors", profile, list(waypoints))
 
 
 class ORSEngine:
@@ -87,6 +88,7 @@ class ORSEngine:
         self.url = url.rstrip("/")
 
     def route(self, points: list[Coordinate], trail_type: str) -> Track:
+        profile = ROAD_PROFILE if trail_type == "road" else PROFILE
         body: dict[str, Any] = {
             "coordinates": [[p.lon, p.lat] for p in points],
             "elevation": True,
@@ -98,9 +100,9 @@ class ORSEngine:
             body["options"]["profile_params"] = {"weightings": {"steepness_difficulty": 1}}
         try:
             data = self.client.request_json(
-                "POST", f"{self.url}/v2/directions/{PROFILE}/geojson",
+                "POST", f"{self.url}/v2/directions/{profile}/geojson",
                 json_body=body, headers={"Authorization": self.api_key}, cache_namespace="ors",
             )
         except NetworkError as e:
             raise EngineError(f"OpenRouteService: {e}") from e
-        return parse_geojson(data, points)
+        return parse_geojson(data, points, profile)

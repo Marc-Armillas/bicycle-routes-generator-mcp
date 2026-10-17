@@ -72,6 +72,15 @@ def test_generate_and_save_full_route(config):
     assert listing[0]["file"] == str(gpx) and listing[0]["exists"]
 
 
+def test_road_route(config):
+    result = make_service(config).generate_and_save(RouteRequest("el papiol", 40, trail_type="road", seed=1))
+    d = result.to_dict()
+    assert d["name"].startswith("Road El Papiol ") and d["activity_type"] == "road_biking"
+    assert ET.parse(result.route.gpx_file).getroot().find("g:trk/g:type", NS).text == "road_biking"
+    mtb = make_service(config).generate_and_save(RouteRequest("el papiol", 20, seed=1)).to_dict()
+    assert mtb["activity_type"] == "mountain_biking"
+
+
 def test_point_to_point_route(config):
     route, n = make_service(config).generate(RouteRequest("A", 10, loop=False, end="B"))
     assert n == 1 and "point-to-point" in route.name
@@ -152,8 +161,10 @@ def test_mcp_tools(config, monkeypatch):
     assert "error" in error
     via = asyncio.run(mcp_server.generate_route("El Papiol", 15, via=["Castellbisbal"]))
     assert [v["name"] for v in via["via"]] == ["El Papiol, Baix Llobregat, Barcelona, Catalonia, Spain"]
+    road = asyncio.run(mcp_server.generate_route("El Papiol", 40, trail_type="road", seed=5))
+    assert road["activity_type"] == "road_biking"
     listing = asyncio.run(mcp_server.list_routes())
-    assert len(listing["routes"]) == 2 and "garmin" in listing["available_exporters"]
+    assert len(listing["routes"]) == 3 and "garmin" in listing["available_exporters"]
 
 
 def test_mcp_server_exposes_tools():

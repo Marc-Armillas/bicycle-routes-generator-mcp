@@ -11,21 +11,29 @@ from .base import EngineError
 
 # Standard BRouter profile per trail type. Compared on real loops from El Papiol, `mtb`
 # gives clearly less pavement and traffic than `gravel`, `trekking` or `MTB_SB_light`;
-# the differences between trail types come from its variables.
+# the differences between trail types come from its variables. For road, `fastbike` gives
+# 87-100 % pavement (`mtb`: 28-49 %).
 PROFILES = {
     "tracks": "mtb",
     "mixed": "mtb",
     "singletrack": "mtb",
+    "road": "fastbike",
 }
 
-# Profile variables overridden per request ("*" = all trail types). See mtb.brf.
+# Variables of the mtb profile shared by all MTB trail types. See mtb.brf.
+MTB_VARIABLES = {
+    "StrictNOBicycleaccess": "1",  # never use ways tagged bicycle=no
+    "avoid_unsafe": "1",           # penalise main roads without cycling infrastructure
+}
+
+# Profile variables overridden per request, by trail type.
 VARIABLES: dict[str, dict[str, str]] = {
-    "*": {
-        "StrictNOBicycleaccess": "1",  # never use ways tagged bicycle=no
-        "avoid_unsafe": "1",           # penalise main roads without cycling infrastructure
-    },
-    "tracks": {"hills": "1"},                  # penalise climbs >3 %: a bit less singletrack and climbing
-    "singletrack": {"path_preference": "80"},  # more singletrack, less pavement (default 20)
+    "tracks": {**MTB_VARIABLES, "hills": "1"},                  # penalise climbs >3 %: a bit less singletrack and climbing
+    "mixed": MTB_VARIABLES,
+    "singletrack": {**MTB_VARIABLES, "path_preference": "80"},  # more singletrack, less pavement (default 20)
+    # fastbike.brf: avoiding roads that usually have traffic is "very important" (same routes as
+    # fastbike-lowtraffic; on real loops it halved the km on busy roads in one case out of two).
+    "road": {"consider_traffic": "1"},
 }
 
 IGNORED_TAGS = {"reversedirection"}
@@ -88,7 +96,7 @@ class BRouterEngine:
             "format": "geojson",
         }
         # Profile variables overridden in the URL (e.g. profile:StrictNOBicycleaccess=1).
-        for key, value in {**self.variables.get("*", {}), **self.variables.get(trail_type, {})}.items():
+        for key, value in self.variables.get(trail_type, {}).items():
             params[f"profile:{key}"] = value
         try:
             data = self.client.request_json("GET", f"{self.url}/brouter", params=params, cache_namespace="brouter")

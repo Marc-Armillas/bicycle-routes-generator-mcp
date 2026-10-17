@@ -5,8 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-TRAIL_TYPES = ("tracks", "mixed", "singletrack")
+TRAIL_TYPES = ("tracks", "mixed", "singletrack", "road")
 MAX_VIA_POINTS = 10  # each one is a Nominatim lookup (1 request per second)
+
+
+def activity_type(trail_type: str) -> str:
+    """Activity for the GPX and Garmin: road bike for "road", mountain bike otherwise."""
+    return "road_biking" if trail_type == "road" else "mountain_biking"
 
 
 @dataclass(frozen=True)
@@ -85,7 +90,7 @@ class ProtectedAreaCrossing:
 
 @dataclass(frozen=True)
 class RouteWarning:
-    kind: str  # traffic | grade | protected_area | access | technical | distance | climb | general
+    kind: str  # traffic | grade | protected_area | access | technical | surface | distance | climb | general
     message: str
     start_km: float | None = None
     end_km: float | None = None

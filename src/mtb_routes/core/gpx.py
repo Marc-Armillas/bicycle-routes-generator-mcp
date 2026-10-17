@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 
 from .. import OSM_ATTRIBUTION, __version__
-from .models import Route
+from .models import Route, activity_type
 
 NS = "http://www.topografix.com/GPX/1/1"
 SCHEMA = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
@@ -45,7 +45,7 @@ def build_gpx(route: Route, now: datetime | None = None) -> str:
     trk = ET.SubElement(gpx, q("trk"))
     ET.SubElement(trk, q("name")).text = route.name
     ET.SubElement(trk, q("desc")).text = short_description(route)
-    ET.SubElement(trk, q("type")).text = "mountain_biking"
+    ET.SubElement(trk, q("type")).text = activity_type(route.request.trail_type)
     seg = ET.SubElement(trk, q("trkseg"))
     for p in route.track.points:
         pt = ET.SubElement(seg, q("trkpt"), {"lat": f"{p.lat:.6f}", "lon": f"{p.lon:.6f}"})
