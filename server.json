@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Marc-Armillas/bicycle-routes-generator-mcp",
+  "title": "Bicycle routes generator MCP",
+  "description": "MTB and road cycling routes on real OpenStreetMap trails, saved as GPX with safety warnings.",
+  "repository": {
+    "url": "https://github.com/Marc-Armillas/bicycle-routes-generator-mcp",
+    "source": "github"
+  },
+  "version": "0.4.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/Marc-Armillas/bicycle-routes-generator-mcp/releases/download/v0.4.0/bicycle-routes-generator-mcp.mcpb",
+      "fileSha256": "6a7d989053cecfd27e61830e5712bbb396b9c9591374f3bd70bdd34317445bec",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

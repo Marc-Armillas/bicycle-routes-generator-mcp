@@ -9,7 +9,7 @@ from ..core.models import Coordinate, Segment, Track, TrackPoint
 from ..net import HttpClient, NetworkError
 from .base import EngineError
 
-# Standard BRouter profile per trail type. Compared on real loops from El Papiol, `mtb`
+# Standard BRouter profile per trail type. Compared on real loops near Barcelona, `mtb`
 # gives clearly less pavement and traffic than `gravel`, `trekking` or `MTB_SB_light`;
 # the differences between trail types come from its variables. For road, `fastbike` gives
 # 87-100 % pavement (`mtb`: 28-49 %).

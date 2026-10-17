@@ -14,7 +14,7 @@ from bicycle_routes.engines.base import EngineError
 from bicycle_routes.geo.nominatim import Place
 
 FIXTURES = Path(__file__).parent / "fixtures"
-PAPIOL = Coordinate(41.4386, 2.0108)
+MADRID = Coordinate(40.4242, -3.7559)
 
 
 class FakeEngine:
@@ -62,7 +62,7 @@ class FakeGeocoder:
 
     def search(self, text: str) -> Place:
         self.queries.append(text)
-        return Place(PAPIOL, "El Papiol, Baix Llobregat, Barcelona, Catalonia, Spain")
+        return Place(MADRID, "Madrid, Comunidad de Madrid, España")
 
 
 class FakeProtectedAreas:

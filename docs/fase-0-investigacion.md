@@ -71,7 +71,7 @@ Además, `generar_ruta` aceptará coordenadas directas (`41.43,2.01`) para no de
 | Pendiente > 12 % | Perfil de elevación suavizado; se listan tramos con km de inicio y longitud |
 | Zonas protegidas | **Overpass API** (`boundary=protected_area`, `leisure=nature_reserve`) sobre el bbox de la ruta; pauta de uso ≈ 10.000 peticiones/día y 1 GB/día por IP ✅; con caché |
 
-**Relevante para El Papiol:** la ruta puede entrar en el **Parc Natural de la Serra de Collserola**, donde la ordenanza solo permite la bici en vías del mapa ciclista (pistas de **más de 3 m**), máximo 20 km/h, y prohíbe senderos estrechos ⚠️ (hay un borrador de 2023 que endurece las sanciones). Propuesta: aviso específico + penalizar `highway=path` dentro de zonas protegidas.
+**Relevante para Barcelona:** una ruta puede entrar en el **Parc Natural de la Serra de Collserola**, donde la ordenanza solo permite la bici en vías del mapa ciclista (pistas de **más de 3 m**), máximo 20 km/h, y prohíbe senderos estrechos ⚠️ (hay un borrador de 2023 que endurece las sanciones). Propuesta: aviso específico + penalizar `highway=path` dentro de zonas protegidas.
 
 ---
 
@@ -152,7 +152,7 @@ El servidor remoto futuro reutilizaría `servicio.py` sin cambios; solo cambia e
 5. **Garmin:** ¿usamos el MCP no oficial existente (riesgo de términos de uso) con la opción (a), o también la (b) para la CLI?
 6. **Wahoo:** solo tú puedes solicitar una app Sandbox en su portal de desarrolladores, si te interesa.
 7. **Licencia del proyecto:** MIT o Apache‑2.0 (recomiendo Apache‑2.0 por su cláusula de patentes; MIT si prefieres simplicidad).
-8. **Peticiones a internet en la implementación:** las pruebas reales (El Papiol, 15/25/40 km) harán peticiones a Nominatim, al motor y a Overpass. Te pediré permiso antes de la primera.
+8. **Peticiones a internet en la implementación:** las pruebas reales (15/25/40 km) harán peticiones a Nominatim, al motor y a Overpass. Te pediré permiso antes de la primera.
 9. **MCPB:** ¿lo empaquetamos en la primera versión o después de validar el núcleo y la CLI?
 10. **Ubicación del proyecto:** ahora está en una carpeta temporal de esta sesión; conviene moverlo a una carpeta tuya.
 

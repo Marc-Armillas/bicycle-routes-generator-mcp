@@ -10,9 +10,9 @@ from bicycle_routes.engines.brouter import BRouterEngine, parse_tags
 from bicycle_routes.engines.ors import ORSEngine
 from bicycle_routes.net import HttpClient
 
-from .conftest import FIXTURES, PAPIOL
+from .conftest import FIXTURES, MADRID
 
-END = Coordinate(41.45, 2.03)
+END = Coordinate(40.44, -3.74)
 
 
 def client_with(handler, tmp_path=None) -> HttpClient:
@@ -29,11 +29,11 @@ def test_brouter_parses_real_response():
 
     def handler(req: httpx.Request) -> httpx.Response:
         requests.append(req)
-        return httpx.Response(200, content=(FIXTURES / "brouter_papiol.json").read_bytes())
+        return httpx.Response(200, content=(FIXTURES / "brouter_sample.json").read_bytes())
 
-    t = BRouterEngine(client_with(handler), "https://brouter.example").route([PAPIOL, END], "mixed")
+    t = BRouterEngine(client_with(handler), "https://brouter.example").route([MADRID, END], "mixed")
     q = requests[0].url.params
-    assert q["profile"] == "mtb" and q["format"] == "geojson" and q["lonlats"].startswith("2.010800,41.438600|")
+    assert q["profile"] == "mtb" and q["format"] == "geojson" and q["lonlats"].startswith("-3.755900,40.424200|")
     assert q["profile:StrictNOBicycleaccess"] == "1" and "profile:path_preference" not in q
     assert requests[0].headers["user-agent"] == "test"
     assert t.distance_m == 2983
@@ -50,9 +50,9 @@ def test_brouter_road_uses_fastbike_without_mtb_variables():
 
     def handler(req: httpx.Request) -> httpx.Response:
         requests.append(req)
-        return httpx.Response(200, content=(FIXTURES / "brouter_papiol.json").read_bytes())
+        return httpx.Response(200, content=(FIXTURES / "brouter_sample.json").read_bytes())
 
-    t = BRouterEngine(client_with(handler), "https://brouter.example").route([PAPIOL, END], "road")
+    t = BRouterEngine(client_with(handler), "https://brouter.example").route([MADRID, END], "road")
     q = requests[0].url.params
     assert q["profile"] == "fastbike" and q["profile:consider_traffic"] == "1"
     assert "profile:StrictNOBicycleaccess" not in q and "profile:avoid_unsafe" not in q
@@ -64,7 +64,7 @@ def test_brouter_server_error():
         return httpx.Response(500, text="from-position not mapped in existing datafile")
 
     with pytest.raises(EngineError, match="not mapped"):
-        BRouterEngine(client_with(handler), "https://b.example").route([PAPIOL, END], "tracks")
+        BRouterEngine(client_with(handler), "https://b.example").route([MADRID, END], "tracks")
 
 
 def test_brouter_uses_disk_cache(tmp_path):
@@ -72,16 +72,16 @@ def test_brouter_uses_disk_cache(tmp_path):
 
     def handler(req):
         calls.append(req)
-        return httpx.Response(200, content=(FIXTURES / "brouter_papiol.json").read_bytes())
+        return httpx.Response(200, content=(FIXTURES / "brouter_sample.json").read_bytes())
 
     engine = BRouterEngine(client_with(handler, tmp_path), "https://b.example")
-    engine.route([PAPIOL, END], "mixed")
-    engine.route([PAPIOL, END], "mixed")
+    engine.route([MADRID, END], "mixed")
+    engine.route([MADRID, END], "mixed")
     assert len(calls) == 1
 
 
 def ors_response() -> dict:
-    coords = [[2.0108 + i * 0.001, 41.4386, 100 + i] for i in range(11)]
+    coords = [[-3.7559 + i * 0.001, 40.4242, 100 + i] for i in range(11)]
     return {"features": [{
         "geometry": {"coordinates": coords},
         "properties": {
@@ -102,7 +102,7 @@ def test_ors_translates_extras_to_osm_tags():
         seen.append(req)
         return httpx.Response(200, json=ors_response())
 
-    t = ORSEngine(client_with(handler), "fake-key").route([PAPIOL, END], "tracks")
+    t = ORSEngine(client_with(handler), "fake-key").route([MADRID, END], "tracks")
     body = json.loads(seen[0].content)
     assert seen[0].headers["authorization"] == "fake-key"
     assert "cycling-mountain" in str(seen[0].url) and body["elevation"] is True
@@ -121,7 +121,7 @@ def test_ors_road_profile():
         seen.append(req)
         return httpx.Response(200, json=ors_response())
 
-    t = ORSEngine(client_with(handler), "fake-key").route([PAPIOL, END], "road")
+    t = ORSEngine(client_with(handler), "fake-key").route([MADRID, END], "road")
     assert "/cycling-road/" in str(seen[0].url) and t.profile == "cycling-road"
     assert "profile_params" not in json.loads(seen[0].content)["options"]
 

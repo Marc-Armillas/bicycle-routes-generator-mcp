@@ -10,10 +10,10 @@ from bicycle_routes.net import HttpClient
 
 
 def test_parse_coordinates():
-    c = parse_coordinates("41.4386, 2.0108")
-    assert c and c.lat == 41.4386 and c.lon == 2.0108
-    assert parse_coordinates("41.4386 2.0108")
-    assert parse_coordinates("El Papiol") is None
+    c = parse_coordinates("40.4242, -3.7559")
+    assert c and c.lat == 40.4242 and c.lon == -3.7559
+    assert parse_coordinates("40.4242 -3.7559")
+    assert parse_coordinates("Casa de Campo") is None
 
 
 def test_nominatim_caches_and_follows_policy(tmp_path):
@@ -21,13 +21,13 @@ def test_nominatim_caches_and_follows_policy(tmp_path):
 
     def handler(req):
         calls.append(req)
-        return httpx.Response(200, json=[{"lat": "41.4386", "lon": "2.0108", "display_name": "el Papiol, Barcelona"}])
+        return httpx.Response(200, json=[{"lat": "40.4242", "lon": "-3.7559", "display_name": "Casa de Campo, Madrid"}])
 
     client = HttpClient("bicycle-routes-generator-mcp/test (contact: x@y.z)", tmp_path, intervals={}, transport=httpx.MockTransport(handler))
     geocoder = Nominatim(client, "https://nominatim.example")
-    place = geocoder.search("El  Papiol")
-    geocoder.search("El Papiol")
-    assert place.coordinate.lat == 41.4386
+    place = geocoder.search("Casa  de Campo")
+    geocoder.search("Casa de Campo")
+    assert place.coordinate.lat == 40.4242
     assert len(calls) == 1
     assert calls[0].headers["user-agent"].startswith("bicycle-routes-generator-mcp/")
     assert calls[0].url.params["limit"] == "1"

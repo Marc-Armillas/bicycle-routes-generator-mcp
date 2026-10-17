@@ -16,7 +16,7 @@ from bicycle_routes.exporters.disk import file_name, safe_path
 from bicycle_routes.geo.nominatim import Place
 from bicycle_routes.service import RouteService
 
-from .conftest import PAPIOL, FakeEngine, FakeGeocoder, FakeProtectedAreas
+from .conftest import MADRID, FakeEngine, FakeGeocoder, FakeProtectedAreas
 
 NS = {"g": "http://www.topografix.com/GPX/1/1"}
 
@@ -52,9 +52,9 @@ def test_request_validation():
 
 def test_generate_and_save_full_route(config):
     service = make_service(config, FakeProtectedAreas([ProtectedAreaCrossing("Parc Natural de Collserola", 2.0, 5.0)]))
-    result = service.generate_and_save(RouteRequest("el papiol", 25, trail_type="tracks", seed=1))
+    result = service.generate_and_save(RouteRequest("madrid", 25, trail_type="tracks", seed=1))
     d = result.to_dict()
-    assert d["name"] == "MTB El Papiol 25 km loop"
+    assert d["name"] == "MTB Madrid 25 km loop"
     assert abs(d["summary"]["distance_km"] - 25) <= 2.5
     assert result.candidates_evaluated == 6
     assert any(w["kind"] == "protected_area" for w in d["summary"]["warnings"])
@@ -73,11 +73,11 @@ def test_generate_and_save_full_route(config):
 
 
 def test_road_route(config):
-    result = make_service(config).generate_and_save(RouteRequest("el papiol", 40, trail_type="road", seed=1))
+    result = make_service(config).generate_and_save(RouteRequest("madrid", 40, trail_type="road", seed=1))
     d = result.to_dict()
-    assert d["name"].startswith("Road El Papiol ") and d["activity_type"] == "road_biking"
+    assert d["name"].startswith("Road Madrid ") and d["activity_type"] == "road_biking"
     assert ET.parse(result.route.gpx_file).getroot().find("g:trk/g:type", NS).text == "road_biking"
-    mtb = make_service(config).generate_and_save(RouteRequest("el papiol", 20, seed=1)).to_dict()
+    mtb = make_service(config).generate_and_save(RouteRequest("madrid", 20, seed=1)).to_dict()
     assert mtb["activity_type"] == "mountain_biking"
 
 
@@ -87,11 +87,11 @@ def test_point_to_point_route(config):
 
 
 class ViaGeocoder(FakeGeocoder):
-    """Each place name maps to a distinct point east of El Papiol."""
+    """Each place name maps to a distinct point east of Madrid."""
 
     def search(self, text: str) -> Place:
         self.queries.append(text)
-        return Place(offset(PAPIOL, 1000 * len(self.queries), 90), text)
+        return Place(offset(MADRID, 1000 * len(self.queries), 90), text)
 
 
 def test_loop_through_via_points_in_order(config):
@@ -99,7 +99,7 @@ def test_loop_through_via_points_in_order(config):
     service = RouteService(config, engine=engine, geocoder=geocoder, protected_areas=FakeProtectedAreas())
     result = service.generate_and_save(RouteRequest("Start", 20, via=("A", "B")))
     assert geocoder.queries == ["Start", "A", "B"]
-    start, a, b = (offset(PAPIOL, 1000 * k, 90) for k in (1, 2, 3))
+    start, a, b = (offset(MADRID, 1000 * k, 90) for k in (1, 2, 3))
     assert engine.calls == [[start, a, b, start]]
     d = result.to_dict()
     assert [v["name"] for v in d["via"]] == ["A", "B"]
@@ -155,13 +155,13 @@ def test_gpx_escapes_characters(config):
 
 def test_mcp_tools(config, monkeypatch):
     monkeypatch.setattr(mcp_server, "_service", make_service(config))
-    d = asyncio.run(mcp_server.generate_route("El Papiol", 15, trail_type="mixed", seed=5))
+    d = asyncio.run(mcp_server.generate_route("Madrid", 15, trail_type="mixed", seed=5))
     assert d["gpx_file"].endswith(".gpx") and "summary" in d
-    error = asyncio.run(mcp_server.generate_route("El Papiol", 15, loop=False))
+    error = asyncio.run(mcp_server.generate_route("Madrid", 15, loop=False))
     assert "error" in error
-    via = asyncio.run(mcp_server.generate_route("El Papiol", 15, via=["Castellbisbal"]))
-    assert [v["name"] for v in via["via"]] == ["El Papiol, Baix Llobregat, Barcelona, Catalonia, Spain"]
-    road = asyncio.run(mcp_server.generate_route("El Papiol", 40, trail_type="road", seed=5))
+    via = asyncio.run(mcp_server.generate_route("Madrid", 15, via=["El Pardo, Madrid"]))
+    assert [v["name"] for v in via["via"]] == ["Madrid, Comunidad de Madrid, España"]
+    road = asyncio.run(mcp_server.generate_route("Madrid", 40, trail_type="road", seed=5))
     assert road["activity_type"] == "road_biking"
     listing = asyncio.run(mcp_server.list_routes())
     assert len(listing["routes"]) == 3 and "garmin" in listing["available_exporters"]
