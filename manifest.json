@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "mtb-routes",
   "display_name": "MTB Routes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generates mountain bike routes on real OpenStreetMap trails and saves them as GPX with elevation.",
   "long_description": "Ask Claude for a route (for example: \"a ~25 km MTB loop from El Papiol, little climbing, on dirt tracks\"). The track is computed by the BRouter engine on real trails; Claude never invents coordinates. It returns distance, climbing, maximum grade, paved/track/singletrack percentages and warnings (traffic, grades over 12 %, protected areas, forbidden access) and saves the GPX in the folder you choose. Climbing from an elevation model may differ from a barometric watch: always check the route before riding. Data © OpenStreetMap contributors (ODbL).",
   "author": {

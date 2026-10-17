@@ -1,6 +1,6 @@
 [project]
 name = "mtb-routes"
-version = "0.1.0"
+version = "0.2.0"
 description = "Generates mountain bike routes on real OpenStreetMap data and exports them as GPX."
 readme = "README.md"
 license = "MIT"
