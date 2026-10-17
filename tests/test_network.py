@@ -5,14 +5,14 @@ Run with:  uv run pytest -m network
 
 import pytest
 
-from mtb_routes.config import Config
-from mtb_routes.core.models import RouteRequest
-from mtb_routes.service import RouteService
+from bicycle_routes.config import Config
+from bicycle_routes.core.models import RouteRequest
+from bicycle_routes.service import RouteService
 
 
 @pytest.mark.network
 def test_real_route_from_el_papiol(tmp_path):
-    config = Config.from_env({"MTB_GPX_DIR": str(tmp_path)})
+    config = Config.from_env({"BIKE_GPX_DIR": str(tmp_path)})
     service = RouteService(config)
     try:
         result = service.generate_and_save(RouteRequest("El Papiol", 15, seed=2026))

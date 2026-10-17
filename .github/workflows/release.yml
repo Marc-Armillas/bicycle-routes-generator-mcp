@@ -1,6 +1,6 @@
 # Builds the Claude Desktop extension and attaches it to a GitHub Release.
 # Trigger: push a tag matching the version, e.g.  git tag v0.1.0 && git push origin v0.1.0
-# The README links to releases/latest/download/mtb-routes.mcpb, which always serves the newest one.
+# The README links to releases/latest/download/bicycle-routes-generator-mcp.mcpb, which always serves the newest one.
 name: Release
 
 on:
@@ -36,9 +36,9 @@ jobs:
       - name: Build the .mcpb extension
         run: |
           npx -y @anthropic-ai/mcpb@2.1.2 validate manifest.json
-          npx -y @anthropic-ai/mcpb@2.1.2 pack . dist/mtb-routes.mcpb
+          npx -y @anthropic-ai/mcpb@2.1.2 pack . dist/bicycle-routes-generator-mcp.mcpb
 
       - name: Create the release with the extension attached
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/mtb-routes.mcpb --title "$GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/bicycle-routes-generator-mcp.mcpb --title "$GITHUB_REF_NAME" --generate-notes

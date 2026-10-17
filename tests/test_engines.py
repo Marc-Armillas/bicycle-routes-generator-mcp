@@ -3,12 +3,12 @@ import json
 import httpx
 import pytest
 
-from mtb_routes.core.analysis import analyze
-from mtb_routes.core.models import Coordinate, RouteRequest
-from mtb_routes.engines.base import EngineError
-from mtb_routes.engines.brouter import BRouterEngine, parse_tags
-from mtb_routes.engines.ors import ORSEngine
-from mtb_routes.net import HttpClient
+from bicycle_routes.core.analysis import analyze
+from bicycle_routes.core.models import Coordinate, RouteRequest
+from bicycle_routes.engines.base import EngineError
+from bicycle_routes.engines.brouter import BRouterEngine, parse_tags
+from bicycle_routes.engines.ors import ORSEngine
+from bicycle_routes.net import HttpClient
 
 from .conftest import FIXTURES, PAPIOL
 

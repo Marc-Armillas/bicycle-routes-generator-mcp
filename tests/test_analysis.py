@@ -1,5 +1,5 @@
-from mtb_routes.core import analysis as a
-from mtb_routes.core.models import ProtectedAreaCrossing, RouteRequest, Segment, Track, TrackPoint
+from bicycle_routes.core import analysis as a
+from bicycle_routes.core.models import ProtectedAreaCrossing, RouteRequest, Segment, Track, TrackPoint
 
 
 def line(n: int, elevation) -> list[TrackPoint]:

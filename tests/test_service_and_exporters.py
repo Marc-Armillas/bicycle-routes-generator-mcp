@@ -5,16 +5,16 @@ from pathlib import Path
 
 import pytest
 
-from mtb_routes import mcp_server
-from mtb_routes.config import Config
-from mtb_routes.core.gpx import build_gpx
-from mtb_routes.core.loop import offset
-from mtb_routes.core.models import ProtectedAreaCrossing, RouteRequest
-from mtb_routes.engines.base import EngineError
-from mtb_routes.exporters import available_exporters, get_exporter
-from mtb_routes.exporters.disk import file_name, safe_path
-from mtb_routes.geo.nominatim import Place
-from mtb_routes.service import RouteService
+from bicycle_routes import mcp_server
+from bicycle_routes.config import Config
+from bicycle_routes.core.gpx import build_gpx
+from bicycle_routes.core.loop import offset
+from bicycle_routes.core.models import ProtectedAreaCrossing, RouteRequest
+from bicycle_routes.engines.base import EngineError
+from bicycle_routes.exporters import available_exporters, get_exporter
+from bicycle_routes.exporters.disk import file_name, safe_path
+from bicycle_routes.geo.nominatim import Place
+from bicycle_routes.service import RouteService
 
 from .conftest import PAPIOL, FakeEngine, FakeGeocoder, FakeProtectedAreas
 
@@ -26,13 +26,13 @@ def make_service(config, areas=None) -> RouteService:
 
 
 def test_config_from_env(tmp_path):
-    c = Config.from_env({"MTB_GPX_DIR": str(tmp_path), "MTB_CONTACT": "a@b.c", "MTB_PROTECTED_AREAS": "0"})
+    c = Config.from_env({"BIKE_GPX_DIR": str(tmp_path), "BIKE_CONTACT": "a@b.c", "BIKE_PROTECTED_AREAS": "0"})
     assert c.gpx_dir == tmp_path.resolve()
-    assert c.data_dir == tmp_path.resolve() / ".mtb-routes"
+    assert c.data_dir == tmp_path.resolve() / ".bicycle-routes"
     assert c.engine == "brouter" and not c.protected_areas
     assert "a@b.c" in c.user_agent and c.user_agent.isascii()
-    assert Config.from_env({}).gpx_dir == Path("/tmp/mtb-routes").resolve()
-    unsubstituted = Config.from_env({"ORS_API_KEY": "${user_config.ors_api_key}", "MTB_ENGINE": "${user_config.engine}"})
+    assert Config.from_env({}).gpx_dir == Path("/tmp/bicycle-routes").resolve()
+    unsubstituted = Config.from_env({"ORS_API_KEY": "${user_config.ors_api_key}", "BIKE_ENGINE": "${user_config.engine}"})
     assert unsubstituted.ors_api_key is None and unsubstituted.engine == "brouter"
 
 

@@ -18,7 +18,7 @@ from .geo.nominatim import POLICY_URL, GeocodingError
 from .service import RouteService
 
 INSTRUCTIONS = f"""\
-mtb-routes generates mountain bike and road cycling routes on real OpenStreetMap trails and
+bicycle-routes generates mountain bike and road cycling routes on real OpenStreetMap trails and
 roads (BRouter or OpenRouteService engine) and saves them as GPX with elevation.
 
 Rules:
@@ -39,7 +39,7 @@ Rules:
 - Data © OpenStreetMap contributors (ODbL).
 """
 
-mcp = MCPServer("mtb-routes", instructions=INSTRUCTIONS, version=__version__)
+mcp = MCPServer("bicycle-routes-generator-mcp", instructions=INSTRUCTIONS, version=__version__)
 _service: RouteService | None = None
 
 

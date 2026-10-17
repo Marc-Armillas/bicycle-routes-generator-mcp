@@ -2,7 +2,7 @@
 
 Usage policy: https://operations.osmfoundation.org/policies/nominatim/
 - At most 1 request per second, single thread (enforced by HttpClient).
-- A User-Agent that identifies the application (MTB_CONTACT).
+- A User-Agent that identifies the application (BIKE_CONTACT).
 - Results cached on disk: the same search is never repeated.
 - Attribution to OpenStreetMap (ODbL).
 - No autocomplete or bulk queries. For heavy use, run your own instance.

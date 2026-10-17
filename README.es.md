@@ -1,8 +1,8 @@
-# mtb-routes
+# Bicycle routes generator MCP
 
 [English](README.md) · **Español**
 
-**[⬇️ Descargar la extensión para Claude Desktop (mtb-routes.mcpb)](https://github.com/Marc-Armillas/mtb-routes/releases/latest/download/mtb-routes.mcpb)**
+**[⬇️ Descargar la extensión para Claude Desktop (bicycle-routes-generator-mcp.mcpb)](https://github.com/Marc-Armillas/bicycle-routes-generator-mcp/releases/latest/download/bicycle-routes-generator-mcp.mcpb)**
 
 Genera rutas de **bicicleta de montaña** y de **carretera** a partir de un lugar y las guarda
 como **GPX con elevación**. El trazado lo calcula un motor de rutas (BRouter u
@@ -13,16 +13,16 @@ Se puede usar:
 
 - **Con Claude** (Claude Desktop o Claude Code) mediante un servidor MCP local: «hazme una
   ruta circular de BTT de ~25 km desde El Papiol, poco desnivel, por pistas».
-- **Desde la terminal**, sin IA: `mtb-routes generate "El Papiol" --km 25 --type tracks`.
+- **Desde la terminal**, sin IA: `bicycle-routes generate "El Papiol" --km 25 --type tracks`.
 
 Cada ruta devuelve un resumen (distancia, desnivel, pendiente máxima, % de asfalto, pista y
 senda) y **avisos**: tramos con tráfico, pendientes superiores al 12 %, zonas protegidas,
 caminos donde la bici no está permitida y tramos técnicos. El código y los mensajes de la
 aplicación están en inglés; Claude te los presenta en tu idioma.
 
-> 💾 **Los GPX se guardan por defecto en `/tmp/mtb-routes`.** macOS vacía `/tmp` al reiniciar y
+> 💾 **Los GPX se guardan por defecto en `/tmp/bicycle-routes`.** macOS vacía `/tmp` al reiniciar y
 > borra los archivos antiguos, así que copia las rutas que quieras conservar (o cambia
-> `MTB_GPX_DIR` a otra carpeta).
+> `BIKE_GPX_DIR` a otra carpeta).
 
 > ⚠️ **Revisa siempre la ruta en un mapa antes de salir.** Los datos de OpenStreetMap pueden
 > estar incompletos o desactualizados, y no reflejan cierres temporales ni toda la normativa
@@ -32,11 +32,11 @@ aplicación están en inglés; Claude te los presenta en tu idioma.
 
 ## Instalación fácil en Claude Desktop (extensión `.mcpb`)
 
-1. [Descarga `mtb-routes.mcpb`](https://github.com/Marc-Armillas/mtb-routes/releases/latest/download/mtb-routes.mcpb) (siempre la última versión), o genéralo con
-   `npx @anthropic-ai/mcpb pack . dist/mtb-routes.mcpb`.
+1. [Descarga `bicycle-routes-generator-mcp.mcpb`](https://github.com/Marc-Armillas/bicycle-routes-generator-mcp/releases/latest/download/bicycle-routes-generator-mcp.mcpb) (siempre la última versión), o genéralo con
+   `npx @anthropic-ai/mcpb pack . dist/bicycle-routes-generator-mcp.mcpb`.
 2. Haz doble clic en el archivo (o arrástralo a Claude Desktop → Ajustes → Extensiones) y pulsa
    **Instalar**.
-3. Rellena la configuración: carpeta de los GPX (por defecto `/tmp/mtb-routes`) y un email de contacto
+3. Rellena la configuración: carpeta de los GPX (por defecto `/tmp/bicycle-routes`) y un email de contacto
    (lo exige la política de uso de OpenStreetMap/Nominatim). El resto de campos son opcionales.
 4. Pídele a Claude: «hazme una ruta circular de BTT de 25 km desde El Papiol por pistas».
 
@@ -50,8 +50,8 @@ soportan extensiones de tipo `uv`.
 Requisitos: macOS, Windows o Linux con [uv](https://docs.astral.sh/uv/) (instala Python por ti).
 
 ```bash
-git clone <url-del-repositorio> mtb-routes
-cd mtb-routes
+git clone <url-del-repositorio> bicycle-routes-generator-mcp
+cd bicycle-routes-generator-mcp
 uv sync
 cp .env.example .env   # y edítalo
 ```
@@ -63,25 +63,25 @@ No hay claves ni datos personales en el código: todo se configura con variables
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
-| `MTB_GPX_DIR` | `/tmp/mtb-routes` | Carpeta donde se guardan los GPX. La app solo escribe aquí (y en su subcarpeta `.mtb-routes/` con caché e índice). En Windows, por defecto es la carpeta temporal del sistema. |
-| `MTB_CONTACT` | — | Email o URL que se envía en el User-Agent. **Recomendado**: lo exige la política de Nominatim. |
-| `MTB_ENGINE` | `brouter` | `brouter` u `ors`. |
-| `MTB_BROUTER_URL` | `https://brouter.de` | Servidor BRouter (público o local, ver abajo). |
-| `ORS_API_KEY` | — | Clave gratuita de [OpenRouteService](https://openrouteservice.org) si `MTB_ENGINE=ors`. |
-| `MTB_PROTECTED_AREAS` | `1` | Comprobar zonas protegidas con Overpass API. |
-| `MTB_GARMIN_MCP_COMMAND` | — | Solo para `--garmin` en la CLI (ver «Garmin»). |
-| `MTB_DATA_DIR` | `<carpeta GPX>/.mtb-routes` | Dónde guardar caché e índice. |
+| `BIKE_GPX_DIR` | `/tmp/bicycle-routes` | Carpeta donde se guardan los GPX. La app solo escribe aquí (y en su subcarpeta `.bicycle-routes/` con caché e índice). En Windows, por defecto es la carpeta temporal del sistema. |
+| `BIKE_CONTACT` | — | Email o URL que se envía en el User-Agent. **Recomendado**: lo exige la política de Nominatim. |
+| `BIKE_ENGINE` | `brouter` | `brouter` u `ors`. |
+| `BIKE_BROUTER_URL` | `https://brouter.de` | Servidor BRouter (público o local, ver abajo). |
+| `ORS_API_KEY` | — | Clave gratuita de [OpenRouteService](https://openrouteservice.org) si `BIKE_ENGINE=ors`. |
+| `BIKE_PROTECTED_AREAS` | `1` | Comprobar zonas protegidas con Overpass API. |
+| `BIKE_GARMIN_MCP_COMMAND` | — | Solo para `--garmin` en la CLI (ver «Garmin»). |
+| `BIKE_DATA_DIR` | `<carpeta GPX>/.bicycle-routes` | Dónde guardar caché e índice. |
 
 ## Uso desde la terminal
 
 ```bash
-uv run mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 500
-uv run mtb-routes generate "41.4386,2.0108" --km 15            # también con coordenadas
-uv run mtb-routes generate "El Papiol" --km 20 --end "Sant Cugat del Vallès"   # ruta lineal
-uv run mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"  # circular por puntos de paso
-uv run mtb-routes generate "El Papiol" --km 40 --seed 7        # otra alternativa reproducible
-uv run mtb-routes generate "El Papiol" --km 25 --json          # salida JSON
-uv run mtb-routes list
+uv run bicycle-routes generate "El Papiol" --km 25 --type tracks --max-climb 500
+uv run bicycle-routes generate "41.4386,2.0108" --km 15            # también con coordenadas
+uv run bicycle-routes generate "El Papiol" --km 20 --end "Sant Cugat del Vallès"   # ruta lineal
+uv run bicycle-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"  # circular por puntos de paso
+uv run bicycle-routes generate "El Papiol" --km 40 --seed 7        # otra alternativa reproducible
+uv run bicycle-routes generate "El Papiol" --km 25 --json          # salida JSON
+uv run bicycle-routes list
 ```
 
 Tipos de camino (`--type`):
@@ -100,7 +100,7 @@ MTB El Papiol 26 km loop
   Distance: 25.9 km · Climbing: +442 m / -443 m · Elevation 20–266 m
   Max grade: 17.0 % uphill, 18.0 % downhill
   Surface: paved 18.7 % · track 67.3 % · singletrack 14.1 %
-  GPX: /tmp/mtb-routes/mtb-el-papiol-26-km-loop-20261017-121732.gpx
+  GPX: /tmp/bicycle-routes/mtb-el-papiol-26-km-loop-20261017-121732.gpx
   Warnings:
    - [traffic] 1.2 km on roads with motor traffic in 6 section(s); ride carefully.
    - [grade] 8 sections (about 2.2 km) are steeper than 12 %; listing the 6 steepest.
@@ -121,9 +121,9 @@ El servidor expone dos herramientas:
 ### Claude Code
 
 ```bash
-claude mcp add mtb-routes \
-  -e MTB_GPX_DIR=/tmp/mtb-routes -e MTB_CONTACT=tu-email@ejemplo.com \
-  -- uv run --directory /ruta/a/mtb-routes mtb-routes-mcp
+claude mcp add bicycle-routes-generator-mcp \
+  -e BIKE_GPX_DIR=/tmp/bicycle-routes -e BIKE_CONTACT=tu-email@ejemplo.com \
+  -- uv run --directory /ruta/a/bicycle-routes-generator-mcp bicycle-routes-mcp
 ```
 
 ### Claude Desktop (sin extensión)
@@ -134,12 +134,12 @@ Ajustes → Desarrollador → Editar configuración (`claude_desktop_config.json
 ```json
 {
   "mcpServers": {
-    "mtb-routes": {
+    "bicycle-routes-generator-mcp": {
       "command": "/ruta/absoluta/a/uv",
-      "args": ["run", "--directory", "/ruta/a/mtb-routes", "mtb-routes-mcp"],
+      "args": ["run", "--directory", "/ruta/a/bicycle-routes-generator-mcp", "bicycle-routes-mcp"],
       "env": {
-        "MTB_GPX_DIR": "/tmp/mtb-routes",
-        "MTB_CONTACT": "tu-email@ejemplo.com"
+        "BIKE_GPX_DIR": "/tmp/bicycle-routes",
+        "BIKE_CONTACT": "tu-email@ejemplo.com"
       }
     }
   }
@@ -156,13 +156,13 @@ Claude Desktop no siempre hereda el `PATH` de la terminal. Reinicia Claude Deskt
 
 ```bash
 npx @anthropic-ai/mcpb validate manifest.json
-npx @anthropic-ai/mcpb pack . dist/mtb-routes.mcpb
+npx @anthropic-ai/mcpb pack . dist/bicycle-routes-generator-mcp.mcpb
 python scripts/make_icon.py    # solo si quieres regenerar icon.png
 ```
 
 ### Publicar una versión
 
-1. Sube `version` a la vez en `manifest.json`, `pyproject.toml` y `src/mtb_routes/__init__.py`.
+1. Sube `version` a la vez en `manifest.json`, `pyproject.toml` y `src/bicycle_routes/__init__.py`.
 2. Crea y sube una etiqueta con esa versión:
 
    ```bash
@@ -170,7 +170,7 @@ python scripts/make_icon.py    # solo si quieres regenerar icon.png
    git push origin v0.1.0
    ```
 
-3. El flujo `Release` de GitHub Actions ejecuta los tests, genera `mtb-routes.mcpb` y lo adjunta
+3. El flujo `Release` de GitHub Actions ejecuta los tests, genera `bicycle-routes-generator-mcp.mcpb` y lo adjunta
    a una nueva Release de GitHub. El enlace de descarga del principio de este README apunta
    siempre a la última.
 
@@ -178,14 +178,14 @@ python scripts/make_icon.py    # solo si quieres regenerar icon.png
 
 La aplicación es independiente de cualquier plataforma: el resultado es un GPX estándar. Los
 envíos a plataformas son **exportadores** opcionales con una interfaz común
-(`export(route, config) -> ExportResult`, en `src/mtb_routes/exporters/`).
+(`export(route, config) -> ExportResult`, en `src/bicycle_routes/exporters/`).
 
-- **disk** (por defecto): guarda el GPX en `MTB_GPX_DIR`.
+- **disk** (por defecto): guarda el GPX en `BIKE_GPX_DIR`.
 - **garmin**: delega en un servidor MCP de Garmin ya instalado (herramienta `upload_course`).
   - *Con Claude (recomendado)*: no hay que configurar nada. Pide «súbela a Garmin» y Claude
     llamará a `upload_course` del MCP de Garmin con el GPX generado y
     `activity_type="mountain_biking"` (`"road_biking"` en rutas de carretera).
-  - *Desde la CLI*: define `MTB_GARMIN_MCP_COMMAND` con el comando que arranca ese servidor y
+  - *Desde la CLI*: define `BIKE_GARMIN_MCP_COMMAND` con el comando que arranca ese servidor y
     usa `--garmin`. Las credenciales de Garmin las gestiona ese servidor, nunca esta app.
   - Los MCP de Garmin comunitarios usan la API web no oficial de Garmin Connect y pueden dejar
     de funcionar. La API oficial (Courses API) es solo para empresas aprobadas.
@@ -207,10 +207,10 @@ envíos a plataformas son **exportadores** opcionales con una interfaz común
   mkdir -p segments4
   curl -o segments4/E0_N40.rd5 https://brouter.de/brouter/segments4/E0_N40.rd5   # Cataluña
   docker run -d -p 17777:17777 -v "$PWD/segments4:/segments4" ghcr.io/abrensch/brouter
-  # y en .env: MTB_BROUTER_URL=http://localhost:17777
+  # y en .env: BIKE_BROUTER_URL=http://localhost:17777
   ```
 
-- **OpenRouteService** (opcional): `MTB_ENGINE=ors` y `ORS_API_KEY` (plan gratuito: 2.000
+- **OpenRouteService** (opcional): `BIKE_ENGINE=ors` y `ORS_API_KEY` (plan gratuito: 2.000
   rutas/día, 40/min). Perfil `cycling-mountain`, o `cycling-road` para `road`.
 
 ### Cómo se genera la ruta circular
@@ -246,7 +246,7 @@ uv run pytest -m network   # prueba opcional contra los servicios reales
 Estructura:
 
 ```text
-src/mtb_routes/
+src/bicycle_routes/
 ├── core/            # modelos, generador de bucles, análisis y GPX (sin red ni plataformas)
 ├── engines/         # BRouter y OpenRouteService (interfaz RoutingEngine)
 ├── geo/             # Nominatim y zonas protegidas (Overpass)

@@ -30,7 +30,7 @@ def build_gpx(route: Route, now: datetime | None = None) -> str:
 
     gpx = ET.Element(q("gpx"), {
         "version": "1.1",
-        "creator": f"mtb-routes {__version__}",
+        "creator": f"bicycle-routes-generator-mcp {__version__}",
         "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": SCHEMA,
     })
     meta = ET.SubElement(gpx, q("metadata"))
