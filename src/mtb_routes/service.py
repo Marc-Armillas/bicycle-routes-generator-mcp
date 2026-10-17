@@ -15,7 +15,7 @@ from . import OSM_ATTRIBUTION
 from .config import Config
 from .core.analysis import analyze, overlap_ratio, score
 from .core.loop import generate_candidates
-from .core.models import ProtectedAreaCrossing, Route, RouteRequest, RouteWarning, Track
+from .core.models import ProtectedAreaCrossing, Route, RouteRequest, RouteWarning, Track, activity_type
 from .engines.base import EngineError, RoutingEngine
 from .engines.brouter import BRouterEngine
 from .engines.ors import ORSEngine
@@ -43,6 +43,7 @@ class GenerationResult:
             "via": [{"name": n, "lat": c.lat, "lon": c.lon} for n, c in r.via],
             "summary": r.summary.to_dict(),
             "engine": f"{r.track.engine} ({r.track.profile})",
+            "activity_type": activity_type(r.request.trail_type),
             "candidates_evaluated": self.candidates_evaluated,
             "exports": [e.to_dict() for e in self.exports],
             "attribution": OSM_ATTRIBUTION,
@@ -139,7 +140,8 @@ class RouteService:
         if short.islower():
             short = short.title()
         kind = "loop" if request.loop else "point-to-point"
-        return f"MTB {short} {track.distance_m / 1000:.0f} km {kind}"
+        bike = "Road" if request.trail_type == "road" else "MTB"
+        return f"{bike} {short} {track.distance_m / 1000:.0f} km {kind}"
 
     def export(self, route: Route, exporters: Sequence[str] = ("disk",)) -> list[ExportResult]:
         names = list(dict.fromkeys(["disk", *exporters]))  # always save to disk first

@@ -1,4 +1,4 @@
-"""mtb-routes: mountain bike routes on real OpenStreetMap data, exported as GPX."""
+"""mtb-routes: mountain bike and road cycling routes on real OpenStreetMap data, exported as GPX."""
 
 __version__ = "0.2.0"
 

@@ -48,6 +48,37 @@ def test_traffic_access_and_technical_detection():
     assert not a.is_technical({"mtb:scale": "1"})
 
 
+def test_heavy_traffic_detection_for_road_bikes():
+    assert a.has_heavy_traffic({"highway": "primary"}) and a.has_heavy_traffic({"highway": "trunk_link"})
+    assert a.has_heavy_traffic({"highway": "secondary", "estimated_traffic_class": "6"})
+    assert not a.has_heavy_traffic({"highway": "tertiary"})
+    assert not a.has_heavy_traffic({"highway": "secondary", "estimated_traffic_class": "5"})
+
+
+def test_road_route_warns_about_unpaved_and_busy_roads_only():
+    segs = [
+        Segment(1000, {"highway": "tertiary"}),
+        Segment(400, {"highway": "track", "surface": "gravel"}),
+        Segment(600, {"highway": "primary"}),
+    ]
+    s = a.analyze(track(line(50, lambda i: 100.0), segs), RouteRequest("x", 2, trail_type="road"))
+    traffic = [w for w in s.warnings if w.kind == "traffic" and w.start_km is not None]
+    assert [(w.start_km, w.end_km) for w in traffic] == [(1.4, 2.0)]  # the primary, not the tertiary
+    surface = [w for w in s.warnings if w.kind == "surface"]
+    assert "road bike" in surface[0].message and (surface[1].start_km, surface[1].end_km) == (1.0, 1.4)
+    mtb = a.analyze(track(line(50, lambda i: 100.0), segs), RouteRequest("x", 2))
+    assert not [w for w in mtb.warnings if w.kind == "surface"]
+
+
+def test_road_score_prefers_pavement():
+    pts = line(100, lambda i: 100.0)
+    paved = track(pts, [Segment(1000, {"highway": "tertiary"})])
+    dirt = track(pts, [Segment(1000, {"highway": "track"})])
+    road, mtb = RouteRequest("x", 2, trail_type="road"), RouteRequest("x", 2, trail_type="tracks")
+    assert a.score(paved, a.analyze(paved, road), road) < a.score(dirt, a.analyze(dirt, road), road)
+    assert a.score(dirt, a.analyze(dirt, mtb), mtb) < a.score(paved, a.analyze(paved, mtb), mtb)
+
+
 def test_grade_over_12_percent_warns():
     # 300 m flat, ~300 m at 20 %, 300 m flat
     def ele(i):

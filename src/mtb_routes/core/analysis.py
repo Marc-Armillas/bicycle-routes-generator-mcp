@@ -35,6 +35,8 @@ UNPAVED = {
     "sand", "mud", "pebblestone", "rock", "woodchips", "grass_paver", "stone",
 }
 TRAFFIC_ROADS = {"motorway", "trunk", "primary", "secondary", "tertiary"}
+BUSY_ROADS = {"motorway", "trunk", "primary"}
+HEAVY_TRAFFIC_CLASS = 6  # BRouter's estimated_traffic_class (1-7)
 PATH_WAYS = {"path", "footway", "bridleway", "steps", "pedestrian"}
 PAVED_WAYS = {
     "residential", "unclassified", "service", "living_street", "cycleway", "road",
@@ -170,6 +172,20 @@ def has_traffic(tags: dict[str, str]) -> bool:
         return False
 
 
+def has_heavy_traffic(tags: dict[str, str]) -> bool:
+    """Busy road even for a road cyclist, who rides secondary and tertiary roads as a matter of course."""
+    if tags.get("highway", "").removesuffix("_link") in BUSY_ROADS:
+        return True
+    try:
+        return int(tags.get("estimated_traffic_class", "0")) >= HEAVY_TRAFFIC_CLASS
+    except ValueError:
+        return False
+
+
+def is_unpaved(tags: dict[str, str]) -> bool:
+    return classify(tags) in {"track", "path"}
+
+
 def bike_forbidden(tags: dict[str, str]) -> bool:
     bicycle = tags.get("bicycle", "")
     if bicycle in {"no", "dismount", "use_sidepath"}:
@@ -264,12 +280,24 @@ def analyze(track: Track, request: RouteRequest, areas: Sequence[ProtectedAreaCr
         warnings.append(RouteWarning("climb", (
             f"Estimated climbing ({ascent:.0f} m) exceeds the requested maximum ({request.max_climb_m:g} m).")))
 
-    traffic = matching_sections(segments, has_traffic, min_length_m=40)
+    road = request.trail_type == "road"
+    traffic = matching_sections(segments, traffic_predicate(request), min_length_m=40)
     if traffic:
         total = sum(b - a for a, b in traffic)
+        what = "busy roads (main roads or heavy estimated traffic)" if road else "roads with motor traffic"
         warnings.append(RouteWarning("traffic", (
-            f"{total / 1000:.1f} km on roads with motor traffic in {len(traffic)} section(s); ride carefully.")))
-        warnings += [RouteWarning("traffic", f"Road with traffic ({_range(a, b)}).", _km(a), _km(b)) for a, b in traffic[:8]]
+            f"{total / 1000:.1f} km on {what} in {len(traffic)} section(s); ride carefully.")))
+        label = "Busy road" if road else "Road with traffic"
+        warnings += [RouteWarning("traffic", f"{label} ({_range(a, b)}).", _km(a), _km(b)) for a, b in traffic[:8]]
+
+    if road:
+        unpaved = matching_sections(segments, is_unpaved, min_length_m=100)
+        if unpaved:
+            total = sum(b - a for a, b in unpaved)
+            warnings.append(RouteWarning("surface", (
+                f"{total / 1000:.1f} km unpaved in {len(unpaved)} section(s): not suitable for a road bike; "
+                "look for an alternative.")))
+            warnings += [RouteWarning("surface", f"Unpaved ({_range(a, b)}).", _km(a), _km(b)) for a, b in unpaved[:8]]
 
     steep = steep_sections(windows)
     if len(steep) > MAX_WARNINGS_PER_KIND:
@@ -297,7 +325,7 @@ def analyze(track: Track, request: RouteRequest, areas: Sequence[ProtectedAreaCr
         path_inside = sum(
             max(0.0, min(b, area.end_km * 1000) - max(a, area.start_km * 1000)) for a, b in paths
         )
-        if "collserola" in area.name.lower():
+        if "collserola" in area.name.lower() and not road:
             msg += (" In Collserola bikes are only allowed on the park's cycling network "
                     "(tracks wider than 3 m), at 20 km/h maximum.")
         if path_inside >= 50:
@@ -319,17 +347,22 @@ def analyze(track: Track, request: RouteRequest, areas: Sequence[ProtectedAreaCr
     )
 
 
+def traffic_predicate(request: RouteRequest) -> Callable[[dict[str, str]], bool]:
+    return has_heavy_traffic if request.trail_type == "road" else has_traffic
+
+
 def score(track: Track, summary: Summary, request: RouteRequest) -> float:
     """Score of a candidate route (lower is better)."""
     target = request.distance_km * 1000
     deviation = abs(track.distance_m - target) / target
     total = sum(s.distance_m for s in track.segments) or 1.0
-    traffic = sum(s.distance_m for s in track.segments if has_traffic(s.tags)) / total
+    busy = traffic_predicate(request)
+    traffic = sum(s.distance_m for s in track.segments if busy(s.tags)) / total
     forbidden = sum(s.distance_m for s in track.segments if bike_forbidden(s.tags)) / total
     forbidden_count = len(matching_sections(track.segments, bike_forbidden, max_gap_m=10))
     surface = {k: v / 100 for k, v in summary.surface_pct.items()}
 
-    paved_weight = {"tracks": 2.0, "mixed": 1.2, "singletrack": 2.0}
+    paved_weight = {"tracks": 2.0, "mixed": 1.2, "singletrack": 2.0, "road": 0.0}
     points = (
         4.0 * max(0.0, deviation - 0.05)
         + 3.0 * overlap_ratio(track.points)
@@ -343,6 +376,9 @@ def score(track: Track, summary: Summary, request: RouteRequest) -> float:
         points += 0.03 * max(0.0, max(summary.max_uphill_grade_pct, summary.max_downhill_grade_pct) - 15)
     elif request.trail_type == "singletrack":
         points -= 0.8 * surface["path"]
+    elif request.trail_type == "road":
+        # Unpaved stretches can make a road route unrideable.
+        points += 8.0 * (surface["track"] + surface["path"])
     if request.max_climb_m:
         points += 3.0 * max(0.0, summary.ascent_m - request.max_climb_m) / request.max_climb_m
     return points

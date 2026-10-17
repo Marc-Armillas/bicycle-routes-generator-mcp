@@ -18,19 +18,21 @@ from .geo.nominatim import POLICY_URL, GeocodingError
 from .service import RouteService
 
 INSTRUCTIONS = f"""\
-mtb-routes generates mountain bike routes on real OpenStreetMap trails (BRouter or
-OpenRouteService engine) and saves them as GPX with elevation.
+mtb-routes generates mountain bike and road cycling routes on real OpenStreetMap trails and
+roads (BRouter or OpenRouteService engine) and saves them as GPX with elevation.
 
 Rules:
 - Never invent coordinates or tracks: always use generate_route. Pass the place as the user
   says it (or 'lat,lon' if they give coordinates).
 - If the user names places the route must pass through, pass them in `via`, in the order
   they will be ridden. With via points the distance comes from them, not from distance_km.
+- For a road bike ride (road cycling, "carretera", "bici de carretera") use trail_type = "road";
+  otherwise the route is for a mountain bike.
 - Show the user the summary and ALL warnings (traffic, grades >12 %, protected areas,
   access), remind them that the elevation model's climbing may differ from a barometric
   watch and that they must check the route before riding.
 - To send the route to Garmin Connect, if the Garmin MCP server is available, call its
-  upload_course tool with gpx_path = gpx_file, activity_type = "mountain_biking",
+  upload_course tool with gpx_path = gpx_file, activity_type = the result's activity_type,
   course_name = the route name (max 128 characters) and a short description (max 512).
 - Place lookup uses Nominatim (OpenStreetMap), limited to 1 request per second and no bulk
   queries: {POLICY_URL}
@@ -54,8 +56,11 @@ async def generate_route(
     distance_km: Annotated[float, Field(ge=2, le=200, description="Approximate distance in km")],
     max_climb_m: Annotated[float | None, Field(gt=0, description="Maximum desired climbing in metres")] = None,
     trail_type: Annotated[
-        Literal["tracks", "mixed", "singletrack"],
-        Field(description="tracks = wide, non-technical dirt tracks; mixed = general MTB; singletrack = more singletrack"),
+        Literal["tracks", "mixed", "singletrack", "road"],
+        Field(description=(
+            "tracks = wide, non-technical dirt tracks; mixed = general MTB; singletrack = more singletrack; "
+            "road = road bike, paved roads with little traffic"
+        )),
     ] = "mixed",
     loop: Annotated[bool, Field(description="Return to the start point")] = True,
     end: Annotated[str | None, Field(description="End point if the route is not a loop")] = None,
@@ -66,7 +71,7 @@ async def generate_route(
         Field(max_length=MAX_VIA_POINTS, description="Places the route must pass through, in order (names or 'lat,lon')"),
     ] = None,
 ) -> dict[str, Any]:
-    """Generate an MTB route on real trails, save it as GPX and return the summary and warnings.
+    """Generate an MTB or road cycling route on real trails/roads, save it as GPX and return the summary and warnings.
 
     Takes 10 to 60 seconds (it evaluates several candidates and picks the best one).
     """

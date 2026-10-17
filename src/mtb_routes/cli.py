@@ -4,6 +4,7 @@ Examples:
     mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 600
     mtb-routes generate "41.4386,2.0108" --km 15 --garmin
     mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"
+    mtb-routes generate "El Papiol" --km 60 --type road
     mtb-routes list
 """
 
@@ -22,13 +23,13 @@ from .service import RouteService
 
 
 def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="mtb-routes", description="Generate MTB routes and save them as GPX.")
+    p = argparse.ArgumentParser(prog="mtb-routes", description="Generate MTB and road cycling routes and save them as GPX.")
     sub = p.add_subparsers(dest="command", required=True)
 
     g = sub.add_parser("generate", help="Generate a route and save it as GPX")
     g.add_argument("start", help="Start location (place name or 'lat,lon')")
     g.add_argument("--km", type=float, required=True, help="Approximate distance in km")
-    g.add_argument("--type", choices=TRAIL_TYPES, default="mixed", help="Preferred trail type")
+    g.add_argument("--type", choices=TRAIL_TYPES, default="mixed", help="Preferred trail type (road = road bike)")
     g.add_argument("--max-climb", type=float, help="Maximum desired climbing (m)")
     g.add_argument("--end", help="End point for a point-to-point route (disables the loop)")
     g.add_argument("--via", action="append", default=[], help="Place to pass through (repeat it, in order)")

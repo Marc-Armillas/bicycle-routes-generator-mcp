@@ -3,8 +3,8 @@
   "name": "mtb-routes",
   "display_name": "MTB Routes",
   "version": "0.2.0",
-  "description": "Generates mountain bike routes on real OpenStreetMap trails and saves them as GPX with elevation.",
-  "long_description": "Ask Claude for a route (for example: \"a ~25 km MTB loop from El Papiol, little climbing, on dirt tracks\"). The track is computed by the BRouter engine on real trails; Claude never invents coordinates. It returns distance, climbing, maximum grade, paved/track/singletrack percentages and warnings (traffic, grades over 12 %, protected areas, forbidden access) and saves the GPX in the folder you choose. Climbing from an elevation model may differ from a barometric watch: always check the route before riding. Data © OpenStreetMap contributors (ODbL).",
+  "description": "Generates mountain bike and road cycling routes on real OpenStreetMap trails and roads and saves them as GPX with elevation.",
+  "long_description": "Ask Claude for a route (for example: \"a ~25 km MTB loop from El Papiol, little climbing, on dirt tracks\" or \"a 60 km road bike loop with little traffic\"). The track is computed by the BRouter engine on real trails; Claude never invents coordinates. It returns distance, climbing, maximum grade, paved/track/singletrack percentages and warnings (traffic, grades over 12 %, protected areas, forbidden access) and saves the GPX in the folder you choose. Climbing from an elevation model may differ from a barometric watch: always check the route before riding. Data © OpenStreetMap contributors (ODbL).",
   "author": {
     "name": "Marc Armillas"
   },
@@ -28,7 +28,7 @@
   "tools": [
     {
       "name": "generate_route",
-      "description": "Generates an MTB route (loop or point-to-point, optionally through via points) on real trails, saves it as GPX and returns the summary and warnings."
+      "description": "Generates an MTB or road cycling route (loop or point-to-point, optionally through via points) on real trails or roads, saves it as GPX and returns the summary and warnings."
     },
     {
       "name": "list_routes",
@@ -84,6 +84,6 @@
       "python": ">=3.11"
     }
   },
-  "keywords": ["mtb", "mountain-bike", "cycling", "gpx", "routes", "openstreetmap", "brouter"],
+  "keywords": ["mtb", "mountain-bike", "road-cycling", "cycling", "gpx", "routes", "openstreetmap", "brouter"],
   "license": "MIT"
 }

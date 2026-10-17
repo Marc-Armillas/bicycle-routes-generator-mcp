@@ -21,10 +21,8 @@ import shlex
 
 from ..config import Config
 from ..core.gpx import short_description
-from ..core.models import Route
+from ..core.models import Route, activity_type
 from .base import ExportResult, register
-
-ACTIVITY_TYPE = "mountain_biking"
 
 
 async def _upload(command: list[str], arguments: dict) -> str:
@@ -56,7 +54,7 @@ class GarminMCPExporter:
         arguments = {
             "gpx_path": str(route.gpx_file),
             "course_name": route.name[:128],
-            "activity_type": ACTIVITY_TYPE,
+            "activity_type": activity_type(route.request.trail_type),
             "description": short_description(route, 512),
         }
         try:

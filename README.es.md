@@ -4,9 +4,10 @@
 
 **[⬇️ Descargar la extensión para Claude Desktop (mtb-routes.mcpb)](https://github.com/Marc-Armillas/mtb-routes/releases/latest/download/mtb-routes.mcpb)**
 
-Genera rutas de **bicicleta de montaña** a partir de un lugar y las guarda como **GPX con
-elevación**. El trazado lo calcula un motor de rutas (BRouter u OpenRouteService) sobre
-**caminos reales de OpenStreetMap**: ni la IA ni la aplicación inventan coordenadas.
+Genera rutas de **bicicleta de montaña** y de **carretera** a partir de un lugar y las guarda
+como **GPX con elevación**. El trazado lo calcula un motor de rutas (BRouter u
+OpenRouteService) sobre **caminos y carreteras reales de OpenStreetMap**: ni la IA ni la
+aplicación inventan coordenadas.
 
 Se puede usar:
 
@@ -88,6 +89,9 @@ Tipos de camino (`--type`):
 - `tracks`: prioriza pistas anchas, poca senda y sin rampas extremas.
 - `mixed` (por defecto): BTT general.
 - `singletrack`: más senda y menos asfalto.
+- `road`: bici de carretera. Carreteras asfaltadas con poco tráfico; avisa de los tramos sin
+  asfaltar y solo de las vías muy transitadas (carreteras principales o con tráfico estimado
+  alto), no de las secundarias normales.
 
 Ejemplo real (resumido; la salida de la aplicación está en inglés):
 
@@ -180,7 +184,7 @@ envíos a plataformas son **exportadores** opcionales con una interfaz común
 - **garmin**: delega en un servidor MCP de Garmin ya instalado (herramienta `upload_course`).
   - *Con Claude (recomendado)*: no hay que configurar nada. Pide «súbela a Garmin» y Claude
     llamará a `upload_course` del MCP de Garmin con el GPX generado y
-    `activity_type="mountain_biking"`.
+    `activity_type="mountain_biking"` (`"road_biking"` en rutas de carretera).
   - *Desde la CLI*: define `MTB_GARMIN_MCP_COMMAND` con el comando que arranca ese servidor y
     usa `--garmin`. Las credenciales de Garmin las gestiona ese servidor, nunca esta app.
   - Los MCP de Garmin comunitarios usan la API web no oficial de Garmin Connect y pueden dejar
@@ -193,7 +197,8 @@ envíos a plataformas son **exportadores** opcionales con una interfaz común
 ## Motores de rutas
 
 - **BRouter** (por defecto, MIT, sin clave). Usa el perfil `mtb` con
-  `StrictNOBicycleaccess=1` (evita caminos con `bicycle=no`) y `avoid_unsafe=1`. El servidor
+  `StrictNOBicycleaccess=1` (evita caminos con `bicycle=no`) y `avoid_unsafe=1`; para `road`,
+  el perfil `fastbike` con `consider_traffic=1` (mismas rutas que `fastbike-lowtraffic`). El servidor
   público `brouter.de` no garantiza disponibilidad: la app hace como máximo 1 petición por
   segundo y cachea las respuestas. Para uso intensivo, levanta uno local (no probado aún en
   este proyecto):
@@ -206,7 +211,7 @@ envíos a plataformas son **exportadores** opcionales con una interfaz común
   ```
 
 - **OpenRouteService** (opcional): `MTB_ENGINE=ors` y `ORS_API_KEY` (plan gratuito: 2.000
-  rutas/día, 40/min).
+  rutas/día, 40/min). Perfil `cycling-mountain`, o `cycling-road` para `road`.
 
 ### Cómo se genera la ruta circular
 

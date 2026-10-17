@@ -4,9 +4,10 @@
 
 **[⬇️ Download the Claude Desktop extension (mtb-routes.mcpb)](https://github.com/Marc-Armillas/mtb-routes/releases/latest/download/mtb-routes.mcpb)**
 
-Generates **mountain bike** routes from a location and saves them as **GPX with elevation**.
-The track is computed by a routing engine (BRouter or OpenRouteService) on **real
-OpenStreetMap trails**: neither the AI nor the application invents coordinates.
+Generates **mountain bike** and **road cycling** routes from a location and saves them as
+**GPX with elevation**. The track is computed by a routing engine (BRouter or
+OpenRouteService) on **real OpenStreetMap trails and roads**: neither the AI nor the
+application invents coordinates.
 
 You can use it:
 
@@ -85,6 +86,8 @@ Trail types (`--type`):
 - `tracks`: favours wide dirt tracks, little singletrack and no extreme ramps.
 - `mixed` (default): general MTB.
 - `singletrack`: more singletrack, less pavement.
+- `road`: road bike. Paved roads with little traffic; warns about unpaved sections and only
+  about busy roads (main roads or heavy estimated traffic), not ordinary secondary roads.
 
 Real example (abridged):
 
@@ -177,7 +180,7 @@ platforms is done by optional **exporters** sharing a common interface
 - **garmin**: delegates to an already installed Garmin MCP server (`upload_course` tool).
   - *With Claude (recommended)*: nothing to configure. Ask "upload it to Garmin" and Claude
     will call the Garmin MCP server's `upload_course` with the generated GPX and
-    `activity_type="mountain_biking"`.
+    `activity_type="mountain_biking"` (`"road_biking"` for road routes).
   - *From the CLI*: set `MTB_GARMIN_MCP_COMMAND` to the command that starts that server and use
     `--garmin`. Garmin credentials are handled by that server, never by this app.
   - Community Garmin MCP servers use Garmin Connect's unofficial web API and may stop working.
@@ -190,7 +193,8 @@ platforms is done by optional **exporters** sharing a common interface
 ## Routing engines
 
 - **BRouter** (default, MIT, no key). Uses the `mtb` profile with `StrictNOBicycleaccess=1`
-  (avoids ways tagged `bicycle=no`) and `avoid_unsafe=1`. The public `brouter.de` server makes
+  (avoids ways tagged `bicycle=no`) and `avoid_unsafe=1`; for `road`, the `fastbike` profile
+  with `consider_traffic=1` (the same routes as `fastbike-lowtraffic`). The public `brouter.de` server makes
   no availability guarantees: the app sends at most 1 request per second and caches responses.
   For heavy use, run a local one (not yet tested in this project):
 
@@ -202,7 +206,7 @@ platforms is done by optional **exporters** sharing a common interface
   ```
 
 - **OpenRouteService** (optional): `MTB_ENGINE=ors` and `ORS_API_KEY` (free plan: 2,000
-  routes/day, 40/min).
+  routes/day, 40/min). Profile `cycling-mountain`, or `cycling-road` for `road`.
 
 ### How the loop is generated
 

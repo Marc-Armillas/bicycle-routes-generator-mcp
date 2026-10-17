@@ -45,6 +45,20 @@ def test_brouter_parses_real_response():
     assert any(w.kind == "traffic" for w in s.warnings)  # tertiary road stretch
 
 
+def test_brouter_road_uses_fastbike_without_mtb_variables():
+    requests = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        requests.append(req)
+        return httpx.Response(200, content=(FIXTURES / "brouter_papiol.json").read_bytes())
+
+    t = BRouterEngine(client_with(handler), "https://brouter.example").route([PAPIOL, END], "road")
+    q = requests[0].url.params
+    assert q["profile"] == "fastbike" and q["profile:consider_traffic"] == "1"
+    assert "profile:StrictNOBicycleaccess" not in q and "profile:avoid_unsafe" not in q
+    assert t.profile == "fastbike"
+
+
 def test_brouter_server_error():
     def handler(req):
         return httpx.Response(500, text="from-position not mapped in existing datafile")
@@ -98,6 +112,18 @@ def test_ors_translates_extras_to_osm_tags():
         {"highway": "track", "surface": "gravel"},
         {"highway": "track", "surface": "dirt"},
     ]
+
+
+def test_ors_road_profile():
+    seen = []
+
+    def handler(req):
+        seen.append(req)
+        return httpx.Response(200, json=ors_response())
+
+    t = ORSEngine(client_with(handler), "fake-key").route([PAPIOL, END], "road")
+    assert "/cycling-road/" in str(seen[0].url) and t.profile == "cycling-road"
+    assert "profile_params" not in json.loads(seen[0].content)["options"]
 
 
 def test_ors_requires_key():
