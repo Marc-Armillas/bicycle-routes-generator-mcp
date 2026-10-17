@@ -2,9 +2,9 @@ import random
 
 import pytest
 
-from mtb_routes.core.analysis import distance_m
-from mtb_routes.core.loop import circle_waypoints, generate_candidate, generate_candidates, offset
-from mtb_routes.engines.base import EngineError
+from bicycle_routes.core.analysis import distance_m
+from bicycle_routes.core.loop import circle_waypoints, generate_candidate, generate_candidates, offset
+from bicycle_routes.engines.base import EngineError
 
 from .conftest import PAPIOL, FakeEngine
 

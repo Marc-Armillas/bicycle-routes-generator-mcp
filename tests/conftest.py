@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from mtb_routes.config import Config
-from mtb_routes.core.analysis import distance_m
-from mtb_routes.core.models import Coordinate, ProtectedAreaCrossing, Segment, Track, TrackPoint
-from mtb_routes.engines.base import EngineError
-from mtb_routes.geo.nominatim import Place
+from bicycle_routes.config import Config
+from bicycle_routes.core.analysis import distance_m
+from bicycle_routes.core.models import Coordinate, ProtectedAreaCrossing, Segment, Track, TrackPoint
+from bicycle_routes.engines.base import EngineError
+from bicycle_routes.geo.nominatim import Place
 
 FIXTURES = Path(__file__).parent / "fixtures"
 PAPIOL = Coordinate(41.4386, 2.0108)
@@ -75,7 +75,7 @@ class FakeProtectedAreas:
 
 @pytest.fixture
 def config(tmp_path: Path) -> Config:
-    return Config(gpx_dir=tmp_path / "gpx", data_dir=tmp_path / "gpx" / ".mtb-routes", contact="test@example.com")
+    return Config(gpx_dir=tmp_path / "gpx", data_dir=tmp_path / "gpx" / ".bicycle-routes", contact="test@example.com")
 
 
 @pytest.fixture

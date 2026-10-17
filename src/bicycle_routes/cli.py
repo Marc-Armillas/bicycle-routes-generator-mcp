@@ -1,11 +1,11 @@
-"""Command-line interface to use mtb-routes without AI.
+"""Command-line interface to use bicycle-routes-generator-mcp without AI.
 
 Examples:
-    mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 600
-    mtb-routes generate "41.4386,2.0108" --km 15 --garmin
-    mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"
-    mtb-routes generate "El Papiol" --km 60 --type road
-    mtb-routes list
+    bicycle-routes generate "El Papiol" --km 25 --type tracks --max-climb 600
+    bicycle-routes generate "41.4386,2.0108" --km 15 --garmin
+    bicycle-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"
+    bicycle-routes generate "El Papiol" --km 60 --type road
+    bicycle-routes list
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ from .service import RouteService
 
 
 def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="mtb-routes", description="Generate MTB and road cycling routes and save them as GPX.")
+    p = argparse.ArgumentParser(prog="bicycle-routes", description="Generate MTB and road cycling routes and save them as GPX.")
     sub = p.add_subparsers(dest="command", required=True)
 
     g = sub.add_parser("generate", help="Generate a route and save it as GPX")

@@ -3,7 +3,7 @@
 Fecha: 17-10-2026 · Estado: **investigación previa a la implementación**
 
 > Documento histórico: usa el nombre provisional «btt-rutas» y nombres en español. La app se llama
-> ahora **mtb-routes** y su código está en inglés (ver [README](../README.es.md)).
+> ahora **bicycle-routes-generator-mcp** y su código está en inglés (ver [README](../README.es.md)).
 
 Leyenda: ✅ comprobado en fuente oficial · ⚠️ fuente secundaria o no verificada del todo · ❓ por verificar al implementar
 

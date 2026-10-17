@@ -4,9 +4,9 @@ Fecha: 17-10-2026 · Motor: BRouter público (perfil `mtb`) · Semilla: 2026 · 
 Los GPX se guardaron en `~/Downloads`. Para repetirlas:
 
 ```bash
-uv run mtb-routes generate "El Papiol" --km 15 --type mixed --seed 2026
-uv run mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 500 --seed 2026
-uv run mtb-routes generate "El Papiol" --km 40 --type mixed --seed 2026
+uv run bicycle-routes generate "El Papiol" --km 15 --type mixed --seed 2026
+uv run bicycle-routes generate "El Papiol" --km 25 --type tracks --max-climb 500 --seed 2026
+uv run bicycle-routes generate "El Papiol" --km 40 --type mixed --seed 2026
 ```
 
 Los datos de OSM cambian cada semana, así que con la misma semilla la ruta puede variar ligeramente.

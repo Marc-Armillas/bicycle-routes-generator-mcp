@@ -3,10 +3,10 @@ import time
 import httpx
 import pytest
 
-from mtb_routes.core.models import TrackPoint
-from mtb_routes.geo.nominatim import GeocodingError, Nominatim, parse_coordinates
-from mtb_routes.geo.protected_areas import OverpassProtectedAreas, group, overpass_query, parse_elements, sample
-from mtb_routes.net import HttpClient
+from bicycle_routes.core.models import TrackPoint
+from bicycle_routes.geo.nominatim import GeocodingError, Nominatim, parse_coordinates
+from bicycle_routes.geo.protected_areas import OverpassProtectedAreas, group, overpass_query, parse_elements, sample
+from bicycle_routes.net import HttpClient
 
 
 def test_parse_coordinates():
@@ -23,13 +23,13 @@ def test_nominatim_caches_and_follows_policy(tmp_path):
         calls.append(req)
         return httpx.Response(200, json=[{"lat": "41.4386", "lon": "2.0108", "display_name": "el Papiol, Barcelona"}])
 
-    client = HttpClient("mtb-routes/test (contact: x@y.z)", tmp_path, intervals={}, transport=httpx.MockTransport(handler))
+    client = HttpClient("bicycle-routes-generator-mcp/test (contact: x@y.z)", tmp_path, intervals={}, transport=httpx.MockTransport(handler))
     geocoder = Nominatim(client, "https://nominatim.example")
     place = geocoder.search("El  Papiol")
     geocoder.search("El Papiol")
     assert place.coordinate.lat == 41.4386
     assert len(calls) == 1
-    assert calls[0].headers["user-agent"].startswith("mtb-routes/")
+    assert calls[0].headers["user-agent"].startswith("bicycle-routes-generator-mcp/")
     assert calls[0].url.params["limit"] == "1"
 
 
@@ -54,7 +54,7 @@ def test_per_server_rate_limit():
 
 
 def test_retries_transient_errors(monkeypatch):
-    monkeypatch.setattr("mtb_routes.net.RETRY_DELAYS", (0.0, 0.0))
+    monkeypatch.setattr("bicycle_routes.net.RETRY_DELAYS", (0.0, 0.0))
     responses = iter([httpx.Response(502), httpx.Response(200, json={"ok": True})])
     client = HttpClient("t", None, intervals={}, transport=httpx.MockTransport(lambda r: next(responses)))
     assert client.request_json("GET", "https://o.example/api") == {"ok": True}

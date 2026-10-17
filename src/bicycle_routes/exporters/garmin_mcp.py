@@ -2,12 +2,12 @@
 
 Two ways to use it:
 
-(a) From Claude (recommended): mtb-routes never talks to Garmin. `generate_route` returns
+(a) From Claude (recommended): bicycle-routes-generator-mcp never talks to Garmin. `generate_route` returns
     the GPX path and Claude calls the Garmin MCP server's `upload_course` tool.
     Nothing needs configuring here.
 
 (b) From the CLI: this exporter starts the Garmin MCP server over stdio with the command in
-    MTB_GARMIN_MCP_COMMAND and calls `upload_course`. Garmin credentials are handled by
+    BIKE_GARMIN_MCP_COMMAND and calls `upload_course`. Garmin credentials are handled by
     that server, never by this application.
 
 Note: community Garmin MCP servers use Garmin Connect's unofficial web API and may break
@@ -49,7 +49,7 @@ class GarminMCPExporter:
             return ExportResult(self.name, False, "The GPX must be saved to disk first")
         if not config.garmin_mcp_command:
             return ExportResult(self.name, False, (
-                "MTB_GARMIN_MCP_COMMAND is not set. From Claude it is not needed: ask it to upload the GPX "
+                "BIKE_GARMIN_MCP_COMMAND is not set. From Claude it is not needed: ask it to upload the GPX "
                 "with the Garmin MCP server's upload_course tool."))
         arguments = {
             "gpx_path": str(route.gpx_file),

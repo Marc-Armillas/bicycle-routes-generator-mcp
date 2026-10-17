@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.4",
-  "name": "mtb-routes",
-  "display_name": "MTB Routes",
+  "name": "bicycle-routes-generator-mcp",
+  "display_name": "Bicycle routes generator MCP",
   "version": "0.3.0",
   "description": "Generates mountain bike and road cycling routes on real OpenStreetMap trails and roads and saves them as GPX with elevation.",
   "long_description": "Ask Claude for a route (for example: \"a ~25 km MTB loop from El Papiol, little climbing, on dirt tracks\" or \"a 60 km road bike loop with little traffic\"). The track is computed by the BRouter engine on real trails; Claude never invents coordinates. It returns distance, climbing, maximum grade, paved/track/singletrack percentages and warnings (traffic, grades over 12 %, protected areas, forbidden access) and saves the GPX in the folder you choose. Climbing from an elevation model may differ from a barometric watch: always check the route before riding. Data © OpenStreetMap contributors (ODbL).",
@@ -11,17 +11,17 @@
   "icon": "icon.png",
   "server": {
     "type": "uv",
-    "entry_point": "src/mtb_routes/mcp_server.py",
+    "entry_point": "src/bicycle_routes/mcp_server.py",
     "mcp_config": {
       "command": "uv",
-      "args": ["run", "--directory", "${__dirname}", "mtb-routes-mcp"],
+      "args": ["run", "--directory", "${__dirname}", "bicycle-routes-mcp"],
       "env": {
-        "MTB_GPX_DIR": "${user_config.gpx_dir}",
-        "MTB_CONTACT": "${user_config.contact}",
-        "MTB_ENGINE": "${user_config.engine}",
-        "MTB_BROUTER_URL": "${user_config.brouter_url}",
+        "BIKE_GPX_DIR": "${user_config.gpx_dir}",
+        "BIKE_CONTACT": "${user_config.contact}",
+        "BIKE_ENGINE": "${user_config.engine}",
+        "BIKE_BROUTER_URL": "${user_config.brouter_url}",
         "ORS_API_KEY": "${user_config.ors_api_key}",
-        "MTB_PROTECTED_AREAS": "${user_config.protected_areas}"
+        "BIKE_PROTECTED_AREAS": "${user_config.protected_areas}"
       }
     }
   },
@@ -39,8 +39,8 @@
     "gpx_dir": {
       "type": "directory",
       "title": "GPX folder",
-      "description": "Where routes are saved (default /tmp/mtb-routes; macOS empties /tmp on restart, so copy routes you want to keep). The extension only writes to this folder (and its hidden .mtb-routes subfolder with cache and index).",
-      "default": "/tmp/mtb-routes",
+      "description": "Where routes are saved (default /tmp/bicycle-routes; macOS empties /tmp on restart, so copy routes you want to keep). The extension only writes to this folder (and its hidden .bicycle-routes subfolder with cache and index).",
+      "default": "/tmp/bicycle-routes",
       "required": true
     },
     "contact": {
