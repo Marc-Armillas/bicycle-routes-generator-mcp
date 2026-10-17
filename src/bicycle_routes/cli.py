@@ -1,10 +1,10 @@
 """Command-line interface to use bicycle-routes-generator-mcp without AI.
 
 Examples:
-    bicycle-routes generate "El Papiol" --km 25 --type tracks --max-climb 600
-    bicycle-routes generate "41.4386,2.0108" --km 15 --garmin
-    bicycle-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"
-    bicycle-routes generate "El Papiol" --km 60 --type road
+    bicycle-routes generate "Casa de Campo, Madrid" --km 25 --type tracks --max-climb 600
+    bicycle-routes generate "40.4242,-3.7559" --km 15 --garmin
+    bicycle-routes generate "Casa de Campo, Madrid" --km 30 --via "El Pardo, Madrid" --via "Aravaca, Madrid"
+    bicycle-routes generate "Madrid" --km 60 --type road
     bicycle-routes list
 """
 

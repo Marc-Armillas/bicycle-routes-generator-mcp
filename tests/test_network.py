@@ -11,11 +11,11 @@ from bicycle_routes.service import RouteService
 
 
 @pytest.mark.network
-def test_real_route_from_el_papiol(tmp_path):
+def test_real_route_from_casa_de_campo(tmp_path):
     config = Config.from_env({"BIKE_GPX_DIR": str(tmp_path)})
     service = RouteService(config)
     try:
-        result = service.generate_and_save(RouteRequest("El Papiol", 15, seed=2026))
+        result = service.generate_and_save(RouteRequest("Casa de Campo, Madrid", 15, seed=2026))
     finally:
         service.close()
     s = result.route.summary

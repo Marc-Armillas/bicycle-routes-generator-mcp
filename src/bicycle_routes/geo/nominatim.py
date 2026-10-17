@@ -36,7 +36,7 @@ class Geocoder(Protocol):
 
 
 def parse_coordinates(text: str) -> Coordinate | None:
-    """Accept 'lat,lon' (e.g. '41.4386, 2.0108'). Return None if it is not a coordinate pair."""
+    """Accept 'lat,lon' (e.g. '40.4242, -3.7559'). Return None if it is not a coordinate pair."""
     m = _COORD_PATTERN.match(text)
     if not m:
         return None

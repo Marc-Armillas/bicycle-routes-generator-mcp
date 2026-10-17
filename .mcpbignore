@@ -13,3 +13,4 @@ scripts/
 *.gpx
 .env.example
 .github/
+server.json

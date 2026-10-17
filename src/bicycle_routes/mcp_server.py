@@ -52,7 +52,7 @@ def _get_service() -> RouteService:
 
 @mcp.tool()
 async def generate_route(
-    start: Annotated[str, Field(description="Start location: place name ('El Papiol, Barcelona') or 'lat,lon'")],
+    start: Annotated[str, Field(description="Start location: place name ('Casa de Campo, Madrid') or 'lat,lon'")],
     distance_km: Annotated[float, Field(ge=2, le=200, description="Approximate distance in km")],
     max_climb_m: Annotated[float | None, Field(gt=0, description="Maximum desired climbing in metres")] = None,
     trail_type: Annotated[

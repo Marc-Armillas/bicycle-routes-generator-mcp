@@ -1,4 +1,5 @@
-# Builds the Claude Desktop extension and attaches it to a GitHub Release.
+# Builds the Claude Desktop extension, attaches it to a GitHub Release and publishes the
+# release to the official MCP Registry.
 # Trigger: push a tag matching the version, e.g.  git tag v0.1.0 && git push origin v0.1.0
 # The README links to releases/latest/download/bicycle-routes-generator-mcp.mcpb, which always serves the newest one.
 name: Release
@@ -42,3 +43,35 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" dist/bicycle-routes-generator-mcp.mcpb --title "$GITHUB_REF_NAME" --generate-notes
+
+  # Separate job: if the registry rejects the publish, the GitHub Release is already out.
+  publish-registry:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # GitHub OIDC login to the registry, no secret needed
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fill in server.json for this release
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/bicycle-routes-generator-mcp.mcpb"
+          # Hash of the file actually published, which MCP clients check before installing.
+          curl -sSLf -o bundle.mcpb "$url"
+          sha=$(sha256sum bundle.mcpb | cut -d' ' -f1)
+          jq --arg v "$version" --arg u "$url" --arg s "$sha" \
+            '.version = $v | .packages[0].identifier = $u | .packages[0].fileSha256 = $s' \
+            server.json > server.tmp && mv server.tmp server.json
+          cat server.json
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to the MCP Registry
+        run: |
+          ./mcp-publisher validate
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
