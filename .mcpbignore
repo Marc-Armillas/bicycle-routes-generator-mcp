@@ -1,0 +1,15 @@
+# Fuera del paquete .mcpb: datos locales, entornos y archivos de desarrollo
+.env
+.venv/
+.git/
+.gitignore
+.pytest_cache/
+__pycache__/
+*.pyc
+dist/
+tests/
+docs/
+scripts/
+*.gpx
+.env.example
+.github/

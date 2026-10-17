@@ -1,0 +1,44 @@
+# Builds the Claude Desktop extension and attaches it to a GitHub Release.
+# Trigger: push a tag matching the version, e.g.  git tag v0.1.0 && git push origin v0.1.0
+# The README links to releases/latest/download/mtb-routes.mcpb, which always serves the newest one.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that the tag matches the manifest version
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match manifest.json version $version" >&2
+            exit 1
+          fi
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Run tests
+        run: uv run pytest -q
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build the .mcpb extension
+        run: |
+          npx -y @anthropic-ai/mcpb@2.1.2 validate manifest.json
+          npx -y @anthropic-ai/mcpb@2.1.2 pack . dist/mtb-routes.mcpb
+
+      - name: Create the release with the extension attached
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/mtb-routes.mcpb --title "$GITHUB_REF_NAME" --generate-notes

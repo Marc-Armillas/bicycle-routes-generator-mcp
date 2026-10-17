@@ -1,0 +1,25 @@
+mtb-routes
+Copyright (c) 2026 Marc Armillas — code under the MIT license (see LICENSE).
+
+Third-party data used by the application (not included in the code)
+-------------------------------------------------------------------
+
+* Trail and place data: © OpenStreetMap contributors, available under the
+  Open Database License (ODbL) 1.0.
+  https://www.openstreetmap.org/copyright
+  Generated GPX routes are "produced works" based on OSM data and must keep
+  this attribution.
+
+* BRouter routing engine (MIT) — https://github.com/abrensch/brouter
+  BRouter elevation: SRTM v4.1 by CGIAR-CSI (~90 m).
+
+* OpenRouteService (optional) — © HeiGIT gGmbH, data © OpenStreetMap.
+  https://openrouteservice.org
+
+* Geocoding: Nominatim (OSMF), subject to its usage policy:
+  https://operations.osmfoundation.org/policies/nominatim/
+
+* Protected areas: Overpass API (OSM data, ODbL).
+
+The files in tests/fixtures contain small excerpts of real BRouter responses
+derived from OpenStreetMap (© OpenStreetMap contributors, ODbL).

@@ -1,0 +1,89 @@
+{
+  "manifest_version": "0.4",
+  "name": "mtb-routes",
+  "display_name": "MTB Routes",
+  "version": "0.1.0",
+  "description": "Generates mountain bike routes on real OpenStreetMap trails and saves them as GPX with elevation.",
+  "long_description": "Ask Claude for a route (for example: \"a ~25 km MTB loop from El Papiol, little climbing, on dirt tracks\"). The track is computed by the BRouter engine on real trails; Claude never invents coordinates. It returns distance, climbing, maximum grade, paved/track/singletrack percentages and warnings (traffic, grades over 12 %, protected areas, forbidden access) and saves the GPX in the folder you choose. Climbing from an elevation model may differ from a barometric watch: always check the route before riding. Data © OpenStreetMap contributors (ODbL).",
+  "author": {
+    "name": "Marc Armillas"
+  },
+  "icon": "icon.png",
+  "server": {
+    "type": "uv",
+    "entry_point": "src/mtb_routes/mcp_server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "mtb-routes-mcp"],
+      "env": {
+        "MTB_GPX_DIR": "${user_config.gpx_dir}",
+        "MTB_CONTACT": "${user_config.contact}",
+        "MTB_ENGINE": "${user_config.engine}",
+        "MTB_BROUTER_URL": "${user_config.brouter_url}",
+        "ORS_API_KEY": "${user_config.ors_api_key}",
+        "MTB_PROTECTED_AREAS": "${user_config.protected_areas}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "generate_route",
+      "description": "Generates an MTB route (loop or point-to-point) on real trails, saves it as GPX and returns the summary and warnings."
+    },
+    {
+      "name": "list_routes",
+      "description": "Lists the saved GPX routes with their summary."
+    }
+  ],
+  "user_config": {
+    "gpx_dir": {
+      "type": "directory",
+      "title": "GPX folder",
+      "description": "Where routes are saved (default /tmp/mtb-routes; macOS empties /tmp on restart, so copy routes you want to keep). The extension only writes to this folder (and its hidden .mtb-routes subfolder with cache and index).",
+      "default": "/tmp/mtb-routes",
+      "required": true
+    },
+    "contact": {
+      "type": "string",
+      "title": "Contact email or website",
+      "description": "Sent with requests to OpenStreetMap services (Nominatim and Overpass), as their usage policy requires. Not shared with anyone else.",
+      "required": true
+    },
+    "engine": {
+      "type": "string",
+      "title": "Routing engine",
+      "description": "brouter (recommended, no key) or ors (OpenRouteService, needs a key).",
+      "default": "brouter",
+      "required": false
+    },
+    "brouter_url": {
+      "type": "string",
+      "title": "BRouter server",
+      "description": "Public server by default. If you run your own: http://localhost:17777",
+      "default": "https://brouter.de",
+      "required": false
+    },
+    "ors_api_key": {
+      "type": "string",
+      "title": "OpenRouteService API key",
+      "description": "Only if you choose the ors engine. Free at openrouteservice.org.",
+      "sensitive": true,
+      "required": false
+    },
+    "protected_areas": {
+      "type": "boolean",
+      "title": "Warn about protected areas",
+      "description": "Queries the Overpass API (OpenStreetMap) to find out whether the route crosses natural parks or reserves.",
+      "default": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.11"
+    }
+  },
+  "keywords": ["mtb", "mountain-bike", "cycling", "gpx", "routes", "openstreetmap", "brouter"],
+  "license": "MIT"
+}
