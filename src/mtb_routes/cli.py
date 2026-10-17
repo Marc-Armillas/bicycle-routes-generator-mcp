@@ -3,6 +3,7 @@
 Examples:
     mtb-routes generate "El Papiol" --km 25 --type tracks --max-climb 600
     mtb-routes generate "41.4386,2.0108" --km 15 --garmin
+    mtb-routes generate "El Papiol" --km 30 --via "Castellbisbal" --via "Molins de Rei"
     mtb-routes list
 """
 
@@ -30,6 +31,7 @@ def _parser() -> argparse.ArgumentParser:
     g.add_argument("--type", choices=TRAIL_TYPES, default="mixed", help="Preferred trail type")
     g.add_argument("--max-climb", type=float, help="Maximum desired climbing (m)")
     g.add_argument("--end", help="End point for a point-to-point route (disables the loop)")
+    g.add_argument("--via", action="append", default=[], help="Place to pass through (repeat it, in order)")
     g.add_argument("--name", help="Route name")
     g.add_argument("--seed", type=int, help="Seed to always get the same route")
     g.add_argument("--garmin", action="store_true", help="Also send to Garmin Connect (see README)")
@@ -57,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
         request = RouteRequest(
             start=args.start, distance_km=args.km, max_climb_m=args.max_climb,
             trail_type=args.type, loop=args.end is None, end=args.end,
-            name=args.name, seed=args.seed,
+            name=args.name, seed=args.seed, via=tuple(args.via),
         )
         exporters = ["disk"] + (["garmin"] if args.garmin else [])
         progress = None if args.json else (lambda m: print(m, file=sys.stderr))

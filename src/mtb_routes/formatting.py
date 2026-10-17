@@ -11,6 +11,7 @@ def format_result(d: dict[str, Any]) -> str:
     lines = [
         f"{d['name']}",
         f"  Start: {d['start']['name']}",
+        *(f"  Via: {v['name']}" for v in d.get("via", [])),
         f"  Distance: {s['distance_km']} km · Climbing: +{s['ascent_m']} m / -{s['descent_m']} m"
         f" · Elevation {s['min_elevation_m']}–{s['max_elevation_m']} m",
         f"  Max grade: {s['max_uphill_grade_pct']} % uphill, {s['max_downhill_grade_pct']} % downhill",

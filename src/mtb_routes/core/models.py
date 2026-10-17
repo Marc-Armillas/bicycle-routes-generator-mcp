@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 TRAIL_TYPES = ("tracks", "mixed", "singletrack")
+MAX_VIA_POINTS = 10  # each one is a Nominatim lookup (1 request per second)
 
 
 @dataclass(frozen=True)
@@ -55,8 +56,14 @@ class RouteRequest:
     end: str | None = None
     name: str | None = None
     seed: int | None = None
+    via: tuple[str, ...] = ()  # places the route must pass through, in order
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "via", tuple(v.strip() for v in self.via))
+        if any(not v for v in self.via):
+            raise ValueError("Via points cannot be empty")
+        if len(self.via) > MAX_VIA_POINTS:
+            raise ValueError(f"At most {MAX_VIA_POINTS} via points")
         if self.trail_type not in TRAIL_TYPES:
             raise ValueError(f"trail_type must be one of {TRAIL_TYPES}")
         if not 2 <= self.distance_km <= 200:
@@ -127,3 +134,4 @@ class Route:
     summary: Summary
     request: RouteRequest
     gpx_file: Path | None = None
+    via: list[tuple[str, Coordinate]] = field(default_factory=list)  # geocoded request.via
