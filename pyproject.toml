@@ -1,6 +1,6 @@
 [project]
 name = "bicycle-routes-generator-mcp"
-version = "0.4.0"
+version = "0.5.0"
 description = "Generates mountain bike and road cycling routes on real OpenStreetMap data and exports them as GPX."
 readme = "README.md"
 license = "MIT"
