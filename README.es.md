@@ -2,6 +2,8 @@
 
 [English](README.md) · **Español**
 
+[![Bicycle routes generator MCP server](https://mcprush.com/badge/bicycle-routes-generator-mcp/card.svg)](https://mcprush.com/to/bicycle-routes-generator-mcp?ref=badge)
+
 **[⬇️ Descargar la extensión para Claude Desktop (bicycle-routes-generator-mcp.mcpb)](https://github.com/Marc-Armillas/bicycle-routes-generator-mcp/releases/latest/download/bicycle-routes-generator-mcp.mcpb)**
 
 Genera rutas de **bicicleta de montaña** y de **carretera** a partir de un lugar y las guarda
